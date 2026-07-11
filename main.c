@@ -22,13 +22,14 @@ int main(void) {
     strcpy(s.security.first_school, "Madaraneh");
     strcpy(s.security.first_book, "mathematics");
     strcpy(s.security.bike_color, "green");
+    strcpy(s.enrollments[0].semester, "14042");
+    strcpy(s.enrollments[0].course_id, "CE101");
+    s.enrollments[0].grade = 19.5;
+    s.enrollment_count = 1;
 
     Student students[1];
     students[0] = s;
     save_students(students, 1);
-    char test_line[] = " \"first_name\": \"Negar\",\n";
-    char result[100];
-    extract_string_value(test_line, "first_name", result);
 
     Student loaded[10];
     load_students(loaded, 10);
@@ -45,5 +46,9 @@ int main(void) {
     printf("First_school: %s \n", loaded[0].security.first_school);
     printf("First_book: %s \n", loaded[0].security.first_book);
     printf("Bike_color: %s \n", loaded[0].security.bike_color);
+    printf("Enrollment: %s - %s - %.2f\n",
+        loaded[0].enrollments[0].semester,
+        loaded[0].enrollments[0].course_id,
+        loaded[0].enrollments[0].grade);
     return 0;
 }

@@ -17,16 +17,4 @@ add_executable(EDU main.c
         utilities.c
         utilities.h
         main.c
-        data.c
-        data.h
-        authentication.c
-        authentication.h
-        admin.c
-        admin.h
-        faculty.c
-        faculty.h
-        student.c
-        student.h
-        utilities.c
-        utilities.h
 )

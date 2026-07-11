@@ -29,7 +29,21 @@ void save_students(Student students[], int count) {
         fprintf(f ," \"birthplace\": \"%s\", \n", students[i].security.birthplace);
         fprintf(f, " \"first_school\": \"%s\", \n", students[i].security.first_school);
         fprintf(f, " \"first_book\": \"%s\", \n", students[i].security.first_book);
-        fprintf(f, " \"bike_color\": \"%s\" \n", students[i].security.bike_color);
+        fprintf(f, " \"bike_color\": \"%s\", \n", students[i].security.bike_color);
+        fprintf(f, " \"enrollments\": [\n");
+        for (int j = 0; j < students[i].enrollment_count; j++) {
+            fprintf(f, " {\"semester\": \"%s\", \"course_id\": \"%s\", \"grade\": %.2f}",
+                students[i].enrollments[j].semester,
+                students[i].enrollments[j].course_id,
+                students[i].enrollments[j].grade);
+            if (j < students[i].enrollment_count - 1) {
+                fprintf(f, ",\n");
+            }
+            else {
+                fprintf(f, "\n");
+            }
+            fprintf(f, " ]\n");
+        }
         fprintf(f, " }");
         if (i < count - 1) {
             fprintf(f, ",\n");
@@ -52,6 +66,7 @@ int load_students(Student students[], int max_count) {
     while (fgets(line, sizeof(line), f) != NULL) {
         if (strstr(line, "\"first_name\"") != NULL) {
             count++;
+            students[count].enrollment_count = 0;
             extract_string_value(line, "first_name", students[count].first_name);
         }
         else if (strstr(line, "\"last_name\"") != NULL) {
@@ -61,6 +76,7 @@ int load_students(Student students[], int max_count) {
             extract_string_value(line, "student_id", students[count].student_id);
         }
         else if (strstr(line, "\"entrance_year\"") != NULL) {
+            students[count].entrance_year = (int) extract_number_value(line, "entrance_year");
         }
         else if (strstr(line, "\"national_code\"") != NULL) {
             extract_string_value(line, "national_code", students[count].national_code);
@@ -91,6 +107,13 @@ int load_students(Student students[], int max_count) {
         }
         else if (strstr(line, "\"bike_color\"") != NULL) {
             extract_string_value(line, "bike_color", students[count].security.bike_color);
+        }
+        else if (strstr(line, "\"course_id\"") != NULL && strstr(line, "\"semester\"") != NULL) {
+            int j = students[count].enrollment_count;
+            extract_string_value(line, "semester", students[count].enrollments[j].semester);
+            extract_string_value(line, "course_id", students[count].enrollments[j].course_id);
+            students[count].enrollments[j].grade = extract_number_value(line, "grade");
+            students[count].enrollment_count++;
         }
     }
     fclose(f);
