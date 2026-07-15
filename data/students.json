@@ -1,0 +1,21 @@
+[
+ {
+ "first_name": "Negin", 
+ "last_name": "Nikfar", 
+ "student_id": "404103874", 
+ "entrance_year": 2008, 
+ "national_code": "1190411202", 
+ "field": "Computer Engineering", 
+ "department": "Computer Engineering", 
+ "section": "Bsc", 
+ "mentor": "Dr.Ali.Najimi", 
+ "password": "123456789", 
+ "birthplace": "Shahreza", 
+ "first_school": "Madaraneh", 
+ "first_book": "mathematics", 
+ "bike_color": "green", 
+ "enrollments": [
+ {"semester": "14042", "course_id": "CE101", "grade": 19.50}
+ ]
+ }
+]
