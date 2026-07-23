@@ -30,10 +30,10 @@ typedef struct Student {
     char first_name[50];
     char last_name[50];
     char student_id[20];
+    int  entrance_year;
     char national_code[20];
     char field[100];
     char department[100];
-    int  entrance_year;
     char section[10];
     char mentor[100];
     char password[50];
@@ -47,10 +47,10 @@ typedef struct Faculty {
     char first_name[50];
     char last_name[50];
     char faculty_id[20];
+    int  entrance_year;
     char national_code[20];
     char field[100];
     char department[100];
-    int  entrance_year;
     char last_degree[50];
     char password[50];
 } Faculty;
@@ -155,5 +155,20 @@ typedef struct SurveyScore {
 
 void save_students(Student students[], int count);
 int load_students(Student students[], int max_count);
+
+void save_faculty(Faculty faculty[], int count);
+int load_faculty(Faculty faculty[], int max_count);
+
+void save_courses(Course courses[], int count);
+int load_courses(Course courses[], int max_count);
+
+void save_offerings(Offering offerings[], int count);
+int load_offerings(Offering offerings[], int max_count);
+
+void save_calendar(Calendar cal);
+Calendar load_calendar();
+
+void save_requests(Request requests[], int count);
+int load_requests(Request requests[], int max_count);
 
 #endif //EDU_PROJECT_DATA_H

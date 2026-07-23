@@ -7,4 +7,6 @@
 
 void extract_string_value(char *line, const char *key, char *output);
 float extract_number_value(char *line, const char *key);
+int extract_string_array(char *line, char output[][20]);
+
 #endif //EDU_PROJECT_UTILITIES_H

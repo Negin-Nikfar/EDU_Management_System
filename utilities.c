@@ -33,3 +33,31 @@ float extract_number_value(char *line, const char *key) {
     float value = atof(colon + 1);
     return value;
 }
+
+int extract_string_array(char *line, char output[][20]) {
+    int count = 0;
+    char *ptr = strchr(line, '[');
+    if (ptr == NULL) {
+        return 0;
+    }
+    while (ptr != NULL) {
+        char *quote_start = strchr(ptr, '"');
+        if (quote_start == NULL) {
+            break;
+        }
+        quote_start++;
+        char *quote_end = strchr(quote_start, '"');
+        if (quote_end == NULL) {
+            break;
+        }
+        int len = quote_end - quote_start;
+        strncpy(output[count], quote_start, len);
+        output[count][len] = '\0';
+        count++;
+        ptr = quote_end + 1;
+        if (strchr(ptr, ']') != NULL && strchr(ptr, ']') < strchr(ptr, '"')) {
+            break;
+        }
+    }
+    return count;
+}
