@@ -42,8 +42,8 @@ void save_students(Student students[], int count) {
             else {
                 fprintf(f, "\n");
             }
-            fprintf(f, " ]\n");
         }
+        fprintf(f, " ]\n");
         fprintf(f, " }");
         if (i < count - 1) {
             fprintf(f, ",\n");

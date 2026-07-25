@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <conio.h>
 #include "utilities.h"
 
 void extract_string_value(char *line, const char *key, char *output) {
@@ -60,4 +61,27 @@ int extract_string_array(char *line, char output[][20]) {
         }
     }
     return count;
+}
+
+void read_password(char *buffer) {
+    int i = 0;
+    char ch;
+    while (1) {
+        ch = getch();
+        if (ch == 13) {
+            break;
+        }
+        if (ch == 8) {
+            if (i > 0) {
+                i--;
+                printf("\b \b");
+            }
+        }
+        else {
+            buffer[i] = ch;
+            i++;
+            printf("*");
+        }
+    }
+    buffer[i] = '\0';
 }
