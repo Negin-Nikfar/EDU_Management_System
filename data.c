@@ -60,6 +60,7 @@ int load_students(Student students[], int max_count) {
     FILE *f = fopen("../data/students.json", "r");
     if (f == NULL) {
         printf("Error opening data/students.json\n");
+        return 0;
     }
     int count = -1;
     char line[300];
@@ -157,6 +158,7 @@ int load_faculty(Faculty faculty[], int max_count) {
     FILE *f = fopen("../data/faculty.json", "r");
     if (f == NULL) {
         printf("Error opening data/faculty.json\n");
+        return 0;
     }
     int count = -1;
     char line[300];
@@ -235,6 +237,7 @@ int load_courses(Course courses[], int max_count) {
     FILE *f = fopen("../data/courses.json", "r");
     if (f == NULL) {
         printf("Error opening data/courses.json\n");
+        return 0;
     }
     int count = -1;
     char line[300];
@@ -300,6 +303,7 @@ int load_offerings(Offering offerings[], int max_count) {
     FILE *f = fopen("../data/offerings.json", "r");
     if (f == NULL) {
         printf("Error opening data/offerings.json\n");
+        return 0;
     }
     int count = -1;
     char line[300];
@@ -383,6 +387,7 @@ void save_requests(Request requests[], int count) {
     FILE *f = fopen("../data/requests.json", "w");
     if (f == NULL) {
         printf("Error opening data/requests.json\n");
+        return;
     }
     fprintf(f, "[\n");
     for (int i = 0; i < count; i++) {
@@ -411,6 +416,7 @@ int load_requests(Request requests[], int max_count) {
     FILE *f = fopen("../data/requests.json", "r");
     if (f == NULL) {
         printf("Error opening data/requests.json\n");
+        return 0;
     }
     int count = -1;
     char line[300];

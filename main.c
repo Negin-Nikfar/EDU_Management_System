@@ -48,7 +48,7 @@ int main(void) {
                     break;
                 }
             case 4:
-                printf("This part will be later.\n");
+                forgot_password(students, student_count, faculty, faculty_count);
                 break;
             case 5:
                 running = 0;

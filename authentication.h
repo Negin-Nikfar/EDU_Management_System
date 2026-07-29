@@ -19,4 +19,6 @@ typedef enum Role {
 int authenticate(Role role, Student students[], int student_count,
                  Faculty faculty[], int faculty_count);
 
+void forgot_password(Student students[], int student_count, Faculty faculties[], int faculty_count);
+
 #endif //EDU_PROJECT_AUTHENTICATION_H

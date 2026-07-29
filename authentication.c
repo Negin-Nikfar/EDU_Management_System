@@ -59,3 +59,121 @@ int authenticate(Role role, Student students[], int student_count,
     }
     return i;
 }
+
+void forgot_password(Student students[], int student_count, Faculty faculties[], int faculty_count) {
+    while (1) {
+        char username[50];
+        printf("Enter username: ");
+        scanf("%s", username);
+
+        int student_index = -1;
+        for (int i = 0; i < student_count; i++) {
+            if (strcmp(students[i].student_id, username) == 0) {
+                student_index = i;
+                break;
+            }
+        }
+        int faculty_index = -1;
+        for (int i = 0; i < faculty_count; i++) {
+            if (strcmp(faculties[i].faculty_id, username) == 0) {
+                faculty_index = i;
+                break;
+            }
+        }
+        if (student_index == -1 && faculty_index == -1) {
+            printf("Invalid username.\n");
+            printf("1. Retry\n");
+            printf("2. Go to login menu\n");
+            int ch;
+            scanf("%d", &ch);
+            if (ch == 2) {
+                return;
+            }
+            else {
+                continue;
+            }
+        }
+        if (faculty_index != -1) {
+            printf("Password reset is only available for students!\n");
+            return;
+        }
+        int all_correct = 1;
+        if (all_correct && strlen(students[student_index].security.birthplace) > 0) {
+            char answer[100];
+            printf("Where were you born? ");
+            scanf("%s", answer);
+            if (strcmp(answer, students[student_index].security.birthplace) != 0) {
+                all_correct = 0;
+            }
+        }
+        if (all_correct && strlen(students[student_index].security.first_school) > 0) {
+            char answer[100];
+            printf("What was the name of your first school? ");
+            scanf("%s", answer);
+            if (strcmp(answer, students[student_index].security.first_school) != 0) {
+                all_correct = 0;
+            }
+        }
+        if (all_correct && strlen(students[student_index].security.first_book) > 0) {
+            char answer[100];
+            printf("What was the title of the first book you read ? ");
+            scanf("%s", answer);
+            if (strcmp(answer, students[student_index].security.first_book) != 0) {
+                all_correct = 0;
+            }
+        }
+        if (all_correct && strlen(students[student_index].security.bike_color) > 0) {
+            char answer[100];
+            printf("What was the color of your first bike? ");
+            scanf("%s", answer);
+            if (strcmp(answer, students[student_index].security.bike_color) != 0) {
+                all_correct = 0;
+            }
+        }
+        if (all_correct != 1) {
+            printf("Incorrect answer!\n");
+            printf("1. Retry\n");
+            printf("2. Go to login menu\n");
+            int ch;
+            scanf("%d", &ch);
+            if (ch == 2) {
+                return;
+            }
+            else {
+                continue;
+            }
+        }
+        printf("Authentication successful!\n");
+        while (1) {
+            char new_password[50];
+            char confirm[50];
+            printf("Enter your new password: ");
+            read_password(new_password);
+            printf("\n");
+
+            printf("Confirm your password: ");
+            read_password(confirm);
+            printf("\n");
+
+            if (strcmp(new_password, confirm) != 0) {
+                printf("Passwords aren't matching.\n");
+                printf("1. Retry\n");
+                printf("2. Go to login menu\n");
+                int ch;
+                scanf("%d", &ch);
+                if (ch == 2) {
+                    return;
+                }
+                else {
+                    continue;
+                }
+            }
+            strcpy(students[student_index].password, new_password);
+            save_students(students, student_count);
+            printf("Password changed successfully.\n");
+            printf("Press any key to go to the login menu...\n");
+            getch();
+            return;
+        }
+    }
+}
