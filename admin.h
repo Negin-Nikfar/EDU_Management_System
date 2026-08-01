@@ -15,4 +15,7 @@ void admin_dashboard(Student students[], int *student_count,
 
 void admin_calendar(Calendar *calendar);
 
+void admin_students(Student students[], int *student_count);
+void show_students_table(Student students[], int student_count);
+
 #endif //EDU_PROJECT_ADMIN_H

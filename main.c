@@ -33,7 +33,7 @@ int main(void) {
         printf("3. Login as admin\n");
         printf("4. Forgot password\n");
         printf("5. Exit\n");
-        printf("Enter your choice: ");
+        printf("Enter an option: ");
         int choice;
         scanf("%d", &choice);
 
@@ -91,7 +91,7 @@ void admin_dashboard(Student students[], int *student_count,
         printf("5. Offerings\n");
         printf("6. Courses\n");
         printf("7. Log out\n");
-        printf("8. Enter a choice: \n");
+        printf("8. Enter an option: \n");
 
         int choice;
         scanf("%d", &choice);
@@ -100,7 +100,7 @@ void admin_dashboard(Student students[], int *student_count,
             admin_calendar(calendar);
             break;
         case 2:
-            printf("This part will be later...\n");
+            admin_students(students, student_count);
             break;
         case 3:
             printf("This part will be later...\n");
