@@ -86,7 +86,7 @@ void admin_dashboard(Student students[], int *student_count,
         printf("Welcome %s\n", ADMIN_USERNAME);
         printf("1. Calendar\n");
         printf("2. Students\n");
-        printf("3. faculties\n");
+        printf("3. Faculty members\n");
         printf("4. Requests\n");
         printf("5. Offerings\n");
         printf("6. Courses\n");
@@ -103,7 +103,7 @@ void admin_dashboard(Student students[], int *student_count,
             admin_students(students, student_count);
             break;
         case 3:
-            printf("This part will be later...\n");
+            admin_faculty(faculties, faculty_count);
             break;
         case 4:
             printf("This part will be later...\n");
