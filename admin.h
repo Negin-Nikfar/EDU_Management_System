@@ -7,7 +7,7 @@
 #include "data.h"
 
 void admin_dashboard(Student students[], int *student_count,
-                    Faculty faculties[], int *faculty_count,
+                    Faculty faculty[], int *faculty_count,
                     Course courses[], int *course_count,
                     Offering offerings[], int *offering_count,
                     Request requests[], int *request_count,
@@ -29,5 +29,26 @@ void show_faculty_table(Faculty faculty[], int faculty_count);
 void search_faculty(Faculty faculty[], int faculty_count);
 void register_faculty(Faculty faculty[], int *faculty_count);
 void remove_faculty(Faculty faculty[], int *faculty_count);
+
+void admin_requests(Request requests[], int *request_count,
+                    Offering offerings[], int *offering_count,
+                    Course courses[], int course_count,
+                    Faculty faculties[], int faculty_count);
+
+void admin_offerings(Offering offerings[], int *offering_count,
+                     Course courses[], int course_count,
+                     Student students[], int *student_count);
+void search_offerings(Offering offerings[], int matching_indexes[],
+                      int matching_count, Course courses[], int course_count);
+void admin_enroll_student(Offering offerings[], int matching_indexes[],
+                          int matching_count, Student students[], int *student_count);
+void admin_withdraw_student(Offering offerings[], int matching_indexes[],
+                            int matching_count, Student students[],int student_count);
+
+void admin_courses(Course courses[], int *course_count, Offering offerings[],
+                   int offering_count, Calendar *calendar);
+void search_courses(Course courses[], int course_count);
+void add_course(Course courses[], int *course_count, Calendar *calendar);
+void remove_course(Course courses[], int *course_count, Offering offerings[], int offering_count);
 
 #endif //EDU_PROJECT_ADMIN_H

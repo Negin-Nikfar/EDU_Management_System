@@ -2,11 +2,9 @@
 // Created by intel one on 7/9/2026.
 //
 #include <stdio.h>
-#include <string.h>
 #include "admin.h"
 #include "data.h"
 #include "authentication.h"
-#include "utilities.h"
 
 int main(void) {
     Student students[100];
@@ -75,7 +73,7 @@ int main(void) {
 }
 
 void admin_dashboard(Student students[], int *student_count,
-                     Faculty faculties[], int *faculty_count,
+                     Faculty faculty[], int *faculty_count,
                      Course courses[], int *course_count,
                      Offering offerings[], int *offering_count,
                      Request requests[], int *request_count,
@@ -103,16 +101,17 @@ void admin_dashboard(Student students[], int *student_count,
             admin_students(students, student_count);
             break;
         case 3:
-            admin_faculty(faculties, faculty_count);
+            admin_faculty(faculty, faculty_count);
             break;
         case 4:
-            printf("This part will be later...\n");
+            admin_requests(requests, request_count, offerings, offering_count,
+                courses, *course_count, faculty, *faculty_count);
             break;
         case 5:
-            printf("This part will be later...\n");
+            admin_offerings(offerings, offering_count, courses, *course_count, students, student_count);
             break;
         case 6:
-            printf("This part will be later...\n");
+            admin_courses(courses, course_count, offerings, *offering_count, calendar);
             break;
         case 7:
             running = 0;
