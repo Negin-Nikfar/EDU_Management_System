@@ -1,0 +1,13 @@
+[
+ {
+ "first_name": "Ali",
+ "last_name": "Najimi",
+ "faculty_id": "4567890123", 
+ "entrance_year": 1980, 
+ "national_code": "1199190091", 
+ "field": "Data Scientist", 
+ "department": "Computer Engineering",
+ "last_degree": "Ph.D", 
+ "password": "110029933" 
+ }
+]

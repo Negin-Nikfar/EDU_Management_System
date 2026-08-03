@@ -1,0 +1,12 @@
+[
+{
+"id": 1, 
+"type": 0, 
+"faculty_id": "4567890123", 
+"course_id": "40153", 
+"semester": "14042", 
+"extra_cap": 100, 
+"place": "Class No.101", 
+"status": 1 
+ }
+]
