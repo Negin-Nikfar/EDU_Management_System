@@ -2,9 +2,10 @@
 // Created by intel one on 7/9/2026.
 //
 #include <stdio.h>
-#include "admin.h"
 #include "data.h"
+#include "admin.h"
 #include "authentication.h"
+#include "faculty.h"
 
 int main(void) {
     Student students[100];
@@ -46,7 +47,9 @@ int main(void) {
             case 2: {
                     int index = authenticate(ROLE_FACULTY, students, student_count, faculty, faculty_count);
                     if (index != -1) {
-                        printf("Login successful! Welcome, %s.\n", faculty[index].first_name);
+                        faculty_dashboard(index, faculty, faculty_count, offerings, &offering_count,
+                            courses, course_count, requests, &request_count, students, student_count,
+                            &calendar);
                     }
                     break;
                 }

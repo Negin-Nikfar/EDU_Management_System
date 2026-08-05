@@ -7,14 +7,5 @@
  "field": "Computer Engineering", 
  "department": "Computer Engineering", 
  "prerequisites": ["CE101", "CE102"]
- },
- {
- "name": "Cal 2", 
- "course_id": "25432", 
- "units": 4, 
- "section": "BSc", 
- "field": "Mathematics", 
- "department": "Mathematics Science",
- "prerequisites": []
  }
 ]

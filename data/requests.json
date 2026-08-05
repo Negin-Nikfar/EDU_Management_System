@@ -8,5 +8,35 @@
 "extra_cap": 100, 
 "place": "Class No.101", 
 "status": 1 
+ },
+{
+"id": 2, 
+"type": 2, 
+"faculty_id": "4567890123", 
+"course_id": "40153", 
+"semester": "14042", 
+"extra_cap": 50, 
+"place": "Class No.101", 
+"status": 0 
+ },
+{
+"id": 3, 
+"type": 1, 
+"faculty_id": "4567890123", 
+"course_id": "40153", 
+"semester": "14042", 
+"extra_cap": 0, 
+"place": "Class No.101", 
+"status": 0 
+ },
+{
+"id": 4, 
+"type": 0, 
+"faculty_id": "4567890123", 
+"course_id": "40153", 
+"semester": "14042", 
+"extra_cap": 198, 
+"place": "Class No.101", 
+"status": 0 
  }
 ]
