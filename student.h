@@ -11,6 +11,9 @@ void student_dashboard(int student_index, Student students[], int student_count,
                        Offering offerings[], int *offering_count,
                        Course courses[], int course_count,
                        Faculty faculty[], int faculty_count,
+                       Homework homeworks[], int hw_count,
+                       Exam exams[], int exam_count,
+                       SurveyScore surveys[], int *survey_count,
                        Calendar *calendar);
 
 void student_offerings(int student_index, Student students[], int student_count,
@@ -39,5 +42,21 @@ void report_card(int student_index, Student students[], Course courses[], int co
 void show_semester_report(int student_index, Student students[], Course courses[],
                           int course_count, Offering offerings[], int offering_count,
                           Faculty faculty[], int faculty_count, char *semester);
+
+void enroll_thesis(int student_index, Student students[], int student_count,
+                   Offering offerings[], int *offering_count, Calendar *calendar);
+
+void run_surveys_for_student(int student_index, Student students[], SurveyScore surveys[],
+                             int *survey_count, Offering offerings[], int offering_count,
+                             Course courses[], int course_count, char *list_semester);
+
+void submit_homework(int student_index, Student students[], Homework homeworks[],
+                     int hw_count, Offering offerings[], int offering_count,
+                     Course courses[], int course_count);
+
+void submit_exam(int student_index, Student students[], Exam exams[],
+                 int exam_count, Offering offerings[], int offering_count,
+                 Course courses[], int course_count);
+
 
 #endif //EDU_PROJECT_STUDENT_H

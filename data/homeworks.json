@@ -1,0 +1,11 @@
+[
+ {
+  "offering_id": "40153_4567890123_140Homework 1",
+  "title": "Homework 1",
+  "total_score": 10.00,
+  "num_questions": 1,
+  "questions": [
+   {"text": "What is 2+2 ?", "option_a": "1", "option_b": "2", "option_c": "3", "option_d": "4", "correct": "d"}
+  ]
+ }
+]

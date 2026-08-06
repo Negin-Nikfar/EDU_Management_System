@@ -112,6 +112,51 @@ void enroll_in_course(int student_index, Student students[], int student_count,
     printf("Enrolled successfully.\n");
 }
 
+void enroll_thesis(int student_index, Student students[], int student_count,
+                   Offering offerings[], int *offering_count, Calendar *calendar) {
+    if (strcmp(students[student_index].section, "PhD") != 0) {
+        printf("Only PhD students can enroll int this thesis course.\n");
+        return;
+    }
+    if (!calendar->unit_selection_active) {
+        printf("Unit selection isn't active.\n");
+        return;
+    }
+    printf("Enter semester number: ");
+    char semester_number[50];
+    scanf("%s", semester_number);
+
+    int thesis_offering_index = -1;
+    for (int i = 0; i < *offering_count; i++) {
+        if (strcmp(offerings[i].course_id, "THESIS") == 0 &&
+            strcmp(offerings[i].faculty_id, students[student_index].mentor) == 0 &&
+            strcmp(offerings[i].semester, semester_number) == 0) {
+            thesis_offering_index = i;
+            break;
+            }
+    }
+    if (thesis_offering_index == -1) {
+        printf("Your mentor hasn't offered the thesis this semester.\n");
+        return;
+    }
+    for (int i = 0; i < students[student_index].enrollment_count; i++) {
+        if (strcmp(students[student_index].enrollments[i].course_id, "THESIS") == 0 &&
+            strcmp(students[student_index].enrollments[i].semester, semester_number) == 0) {
+            printf("You ara already enrolled in a thesis course this semester.\n");
+            return;
+            }
+    }
+    int enrolled_index = students[student_index].enrollment_count;
+    strcpy(students[student_index].enrollments[enrolled_index].semester, semester_number);
+    strcpy(students[student_index].enrollments[enrolled_index].course_id, "THESIS");
+    students[student_index].enrollments[enrolled_index].grade = -1;
+    students[student_index].enrollment_count++;
+    offerings[thesis_offering_index].enrolled_count++;
+    save_students(students, student_count);
+    save_offerings(offerings, *offering_count);
+    printf("Enrolled in thesis successfully!\n");
+}
+
 void withdraw_course(int student_index, Student students[], int student_count,
                      Offering offerings[], int matching_indexes[], int matching_count,
                      Calendar *calendar) {
@@ -327,10 +372,203 @@ void report_card(int student_index, Student students[], Course courses[], int co
     }
 }
 
+void run_surveys_for_student(int student_index, Student students[], SurveyScore surveys[],
+                             int *survey_count, Offering offerings[], int offering_count,
+                             Course courses[], int course_count, char *last_semester) {
+    Student s = students[student_index];
+    for (int i = 0; i < s.enrollment_count; i++) {
+        if (strcmp(s.enrollments[i].semester, last_semester) != 0) {
+            continue;
+        }
+        int offering_index = -1;
+        for (int j = 0; j < offering_count; j++) {
+            if (strcmp(offerings[j].course_id, s.enrollments[i].course_id) == 0 &&
+                strcmp(offerings[j].semester, last_semester) == 0) {
+                offering_index = j;
+                break;
+            }
+        }
+        if (offering_index == -1) {
+            continue;
+        }
+        char offering_id[100];
+        sprintf(offering_id, "%s_%s_%s", offerings[offering_index].course_id,
+                offerings[offering_index].faculty_id, offerings[offering_index].semester);
+        int already_surveyed = 0;
+        for (int k = 0; k < *survey_count; k++) {
+            if (strcmp(surveys[k].student_id, s.student_id) == 0 &&
+                strcmp(surveys[k].offering_id, offering_id) == 0) {
+                already_surveyed = 1;
+                break;
+            }
+        }
+        if (already_surveyed == 1) {
+            continue;
+        }
+        char course_name[100] = "Unknown";
+        for (int j = 0; j < course_count; j++) {
+            if (strcmp(courses[j].course_id, s.enrollments[i].course_id) == 0) {
+                strcpy(course_name, courses[j].name);
+                break;
+            }
+        }
+        printf("Rate this course (1-10): %s\n", course_name);
+        int score;
+        scanf("%d", &score);
+
+        while (score < 1 || score > 10) {
+            printf("Invalid score. Try again: ");
+            scanf("%d", &score);
+        }
+        strcpy(surveys[*survey_count].student_id, s.student_id);
+        strcpy(surveys[*survey_count].offering_id, offering_id);
+        surveys[*survey_count].score = score;
+        (*survey_count)++;
+    }
+    save_surveys(surveys, *survey_count);
+}
+
+void submit_homework(int student_index, Student students[], Homework homeworks[],
+                     int hw_count, Offering offerings[], int offering_count,
+                     Course courses[], int course_count) {
+    printf("Enter offering course id to see homeworks: ");
+    char course_id[50];
+    scanf("%s", course_id);
+
+    printf("Enter semester number: ");
+    char semester_number[50];
+    scanf("%s", semester_number);
+
+    int offering_index = -1;
+    for (int j = 0; j < offering_count; j++) {
+        if (strcmp(offerings[j].course_id, course_id) == 0 &&
+            strcmp(offerings[j].semester, semester_number) == 0) {
+            offering_index = j;
+            break;
+        }
+    }
+    if (offering_index == -1) {
+        printf("Offering not found.\n");
+        return;
+    }
+    char offering_id[100];
+    sprintf(offering_id, "%s_%s_%s", offerings[offering_index].course_id,
+            offerings[offering_index].faculty_id, offerings[offering_index].semester);
+    int hw_index = -1;
+    for (int k = 0; k < hw_count; k++) {
+        if (strcmp(homeworks[k].offering_id, offering_id) == 0) {
+            hw_index = k;
+            break;
+        }
+    }
+    if (hw_index == -1) {
+        printf("No homework found for this offering.\n");
+        return;
+    }
+    Homework *hw = &homeworks[hw_index];
+    float total_earned = 0;
+    float score_percentage_q = hw->total_score / (float) hw->num_questions;
+    for (int i = 0; i < hw->num_questions; i++) {
+        printf("%s\n", hw->questions[i].text);
+        printf("a) %s\n", hw->questions[i].option_a);
+        printf("b) %s\n", hw->questions[i].option_b);
+        printf("c) %s\n", hw->questions[i].option_c);
+        printf("d) %s\n", hw->questions[i].option_d);
+        printf("Your answer: ");
+        char answer;
+        scanf(" %c", &answer);
+
+        while (answer != 'a' && answer != 'b' && answer != 'c' && answer != 'd') {
+            printf("Invalid answer. Try again: ");
+            scanf(" %c", &answer);
+        }
+        if (answer == hw->questions[i].correct) {
+            total_earned += score_percentage_q;
+        }
+    }
+    printf("Your score: %.2f / %.2f\n", total_earned, hw->total_score);
+}
+
+void submit_exam(int student_index, Student students[], Exam exams[],
+                 int exam_count, Offering offerings[], int offering_count,
+                 Course courses[], int course_count) {
+    printf("Enter offering course id to exams: ");
+    char course_id[50];
+    scanf("%s", course_id);
+
+    printf("Enter semester number: ");
+    char semester_number[50];
+    scanf("%s", semester_number);
+
+    int offering_index = -1;
+    for (int j = 0; j < offering_count; j++) {
+        if (strcmp(offerings[j].course_id, course_id) == 0 &&
+            strcmp(offerings[j].semester, semester_number) == 0) {
+            offering_index = j;
+            break;
+        }
+    }
+    if (offering_index == -1) {
+        printf("Offering not found.\n");
+        return;
+    }
+    char offering_id[100];
+    sprintf(offering_id, "%s_%s_%s", offerings[offering_index].course_id,
+        offerings[offering_index].faculty_id, offerings[offering_index].semester);
+    int exam_index = -1;
+    for (int k = 0; k < exam_count; k++) {
+        if (strcmp(exams[k].offering_id, offering_id) == 0) {
+            exam_index = k;
+            break;
+        }
+    }
+    if (exam_index == -1) {
+        printf("No exam found for this offering.\n");
+        return;
+    }
+    Exam *exam = &exams[exam_index];
+    float total_earned = 0;
+    float score_percentage_q = exam->total_score / exam->num_questions;
+    int has_descriptive = 0;
+    for (int i = 0; i < exam->num_questions; i++) {
+        printf("%s\n", exam->questions[i].text);
+        if (exam->questions[i].type == MCQ) {
+            printf("a) %s\n", exam->questions[i].option_a);
+            printf("b) %s\n", exam->questions[i].option_b);
+            printf("c) %s\n", exam->questions[i].option_c);
+            printf("d) %s\n", exam->questions[i].option_d);
+            printf("Your answer: ");
+            char answer;
+            scanf(" %c", &answer);
+
+            if (answer == exam->questions[i].correct) {
+                total_earned += score_percentage_q;
+            }
+        }
+        else {
+            printf("Your answer: ");
+            char answer[300];
+            scanf(" %[^\n]", answer);
+
+            has_descriptive = 1;
+        }
+    }
+    printf("Your score so far: %.2f / %.2f\n", total_earned, exam->total_score);
+    if (has_descriptive) {
+        printf("Answers submitted. Descriptive questions will be graded by the instructor.\n");
+    }
+    else {
+        printf("Answers submitted.\n");
+    }
+}
+
 void student_dashboard(int student_index, Student students[], int student_count,
                        Offering offerings[], int *offering_count,
                        Course courses[], int course_count,
                        Faculty faculty[], int faculty_count,
+                       Homework homeworks[], int hw_count,
+                       Exam exams[], int exam_count,
+                       SurveyScore surveys[], int *survey_count,
                        Calendar *calendar) {
     int running = 1;
     while (running) {
@@ -338,7 +576,11 @@ void student_dashboard(int student_index, Student students[], int student_count,
         printf("1. Offerings\n");
         printf("2. Courses\n");
         printf("3. Report card\n");
-        printf("4. Log out\n");
+        printf("4. Enroll in thesis (PhD)\n");
+        printf("5. Course surveys\n");
+        printf("6. Submit homework\n");
+        printf("7. Submit exam\n");
+        printf("8. Log out\n");
         printf("Enter an option: ");
         int choice;
         scanf("%d", &choice);
@@ -357,7 +599,26 @@ void student_dashboard(int student_index, Student students[], int student_count,
                             *offering_count, faculty, faculty_count);
                 break;
             case 4:
-               running = 0;
+                enroll_thesis(student_index, students, student_count, offerings,
+                          offering_count, calendar);
+                break;
+            case 5:
+                printf("Enter last semester number: ");
+                char last_semester[50];
+                scanf("%s", last_semester);
+                run_surveys_for_student(student_index, students, surveys, survey_count,
+                                    offerings, *offering_count, courses, course_count, last_semester);
+                break;
+            case 6:
+                submit_homework(student_index, students, homeworks, hw_count, offerings,
+                            *offering_count, courses, course_count);
+                break;
+            case 7:
+                submit_exam(student_index, students, exams, exam_count, offerings,
+                *offering_count, courses, course_count);
+                break;
+            case 8:
+                running = 0;
                 break;
             default:
                 printf("Invalid choice. Try again!\n");

@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "data.h"
 #include "faculty.h"
 
@@ -118,10 +119,177 @@ void remove_offering_request(int offering_index, Offering offerings[], Faculty f
     printf("Sent request to admin.\n");
 }
 
+void publish_homework(int offering_index, Offering offerings[], Faculty faculty[],
+                      int faculty_index, Homework homeworks[], int *hw_count, Calendar *calendar) {
+    if (!calendar->class_exam_active) {
+        printf("Class period isn't active.\n");
+        return;
+    }
+    Homework hw;
+    sprintf(hw.offering_id, "%s_%s_%s", offerings[offering_index].course_id,
+            offerings[offering_index].faculty_id, offerings[offering_index].semester);
+    printf("Enter homework title: ");
+    scanf(" %[^\n]", hw.title);
+
+    printf("Enter total score: ");
+    scanf("%f", &hw.total_score);
+
+    printf("Enter number of questions: ");
+    int n;
+    scanf("%d", &n);
+
+    if (n < 1) {
+        printf("Number of questions must be greater than zero.\n");
+        return;
+    }
+    hw.num_questions = n;
+    for (int i = 0; i < n; i++) {
+        printf("Questions %d: ", i + 1);
+        scanf(" %[^\n]", hw.questions[i].text);
+
+        printf("Option a: ");
+        scanf(" %[^\n]", hw.questions[i].option_a);
+
+        printf("Option b: ");
+        scanf(" %[^\n]", hw.questions[i].option_b);
+
+        printf("Option c: ");
+        scanf(" %[^\n]", hw.questions[i].option_c);
+
+        printf("Option d: ");
+        scanf(" %[^\n]", hw.questions[i].option_d);
+
+        printf("Correct option (a/b/c/d): ");
+        scanf(" %c", &hw.questions[i].correct);
+    }
+    homeworks[*hw_count] = hw;
+    (*hw_count)++;
+    save_homeworks(homeworks, *hw_count);
+    printf("Homework published.\n");
+}
+
+void publish_exam(int offering_index, Offering offerings[], Faculty faculty[], int faculty_index,
+                  Exam exams[], int *exam_count, Calendar *calendar) {
+    if (!calendar->class_exam_active) {
+        printf("Class period isn't active.\n");
+        return;
+    }
+    Exam ex;
+    sprintf(ex.offering_id, "%s_%s_%s", offerings[offering_index].course_id,
+        offerings[offering_index].faculty_id, offerings[offering_index].semester);
+    printf("Enter exam title: ");
+    scanf(" %[^\n]", ex.title);
+
+    printf("Enter total score: ");
+    scanf("%f", &ex.total_score);
+
+    printf("Enter number of questions: ");
+    int n;
+    scanf("%d", &n);
+
+    ex.num_questions = n;
+    for (int i = 0; i < n; i++) {
+        printf("Questions %d type? (1. MCQ 2. Descriptive): ", i + 1);
+        int type_choice;
+        scanf("%d", &type_choice);
+
+        printf("Enter question text: ");
+        scanf(" %[^\n]", ex.questions[i].text);
+
+        if (type_choice == 1) {
+            ex.questions[i].type = MCQ;
+            printf("Option a: ");
+            scanf(" %[^\n]", ex.questions[i].option_a);
+
+            printf("Option b: ");
+            scanf(" %[^\n]", ex.questions[i].option_b);
+
+            printf("Option c: ");
+            scanf(" %[^\n]", ex.questions[i].option_c);
+
+            printf("Option d: ");
+            scanf(" %[^\n]", ex.questions[i].option_d);
+
+            printf("Correct option (a/b/c/d): ");
+            scanf(" %c", &ex.questions[i].correct);
+        }
+        else {
+            ex.questions[i].type = DESCRIPTIVE;
+            printf("Enter reference answer: ");
+            scanf(" %[^\n]", ex.questions[i].reference_answer);
+        }
+    }
+    exams[*exam_count] = ex;
+    (*exam_count)++;
+    save_exams(exams, *exam_count);
+    printf("Exam published.\n");
+}
+
+void show_survey_results(int offering_index, Offering offerings[], SurveyScore surveys[], int survey_count) {
+    char offering_id[100];
+    sprintf(offering_id, "%s_%s_%s", offerings[offering_index].course_id, offerings[offering_index].faculty_id,
+            offerings[offering_index].semester);
+    int scores[100];
+    int n = 0;
+    for (int i = 0; i < survey_count; i++) {
+        if (strcmp(surveys[i].offering_id, offering_id) == 0) {
+            scores[n] = surveys[i].score;
+            n++;
+        }
+    }
+    if (n == 0) {
+        printf("No survey responses yet.\n");
+        return;
+    }
+    float sum = 0;
+    for (int i = 0; i < n; i++) {
+        sum += scores[i];
+    }
+    float average = sum / n;
+    float sum_sq_diff = 0;
+    for (int i = 0; i < n; i++) {
+        sum_sq_diff += (scores[i] - average) * (scores[i] - average);
+    }
+    float std_dev = sqrt(sum_sq_diff / n);
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (scores[j] > scores[j + 1]) {
+                int temp = scores[j];
+                scores[j] = scores[j + 1];
+                scores[j + 1] = temp;
+            }
+        }
+    }
+    int Q1 = scores[n / 4];
+    int Q2 = scores[n / 2];
+    int Q3 = scores[3 * n / 4];
+    printf("Survey Results:\n");
+    printf("Average: %.2f\n", average);
+    printf("Std Dev: %.2f\n", std_dev);
+    printf("Q1: %d Q2: %d Q3: %d\n", Q1, Q2, Q3);
+    printf("Distribution:\n");
+    for (int s = 1; s <= 10; s++) {
+        int count = 0;
+        for (int i = 0; i < n; i++) {
+            if (scores[i] == s) {
+                count++;
+            }
+        }
+        printf("%d | ", s);
+        for (int k = 0; k < count; k++) {
+            printf("#");
+        }
+        printf(" (%d)\n", count);
+    }
+}
+
 void offering_menu(int offering_index, Faculty faculty[], int faculty_index,
                    Offering offerings[],Course courses[], int course_count,
                    Student students[], int student_count,
                    Request requests[], int *request_count,
+                   Homework homeworks[], int *hw_count,
+                   Exam exams[], int *exam_count,
+                   SurveyScore surveys[], int survey_count,
                    Calendar *calendar) {
     char course_name[100] = "Unknown";
     for (int j = 0; j < course_count; j++) {
@@ -142,7 +310,8 @@ void offering_menu(int offering_index, Faculty faculty[], int faculty_index,
         printf("3. Remove offering\n");
         printf("4. Publish a homework\n");
         printf("5. Publish an exam\n");
-        printf("6. Go back\n");
+        printf("6. Show survey results\n");
+        printf("7. Go back\n");
         printf("Enter an option: ");
         int choice;
         scanf("%d", &choice);
@@ -160,12 +329,17 @@ void offering_menu(int offering_index, Faculty faculty[], int faculty_index,
                                         requests, request_count, calendar);
                 break;
             case 4:
-                printf("This part will be later...\n");
+                publish_homework(offering_index, offerings, faculty, faculty_index,
+                            homeworks, hw_count, calendar);
                 break;
             case 5:
-                printf("This part will be later...\n");
+                publish_exam(offering_index, offerings, faculty, faculty_index,
+                         exams, exam_count, calendar);
                 break;
             case 6:
+                show_survey_results(offering_index, offerings, surveys, survey_count);
+                break;
+            case 7:
                 running = 0;
                 break;
             default:
@@ -179,6 +353,9 @@ void my_offerings(int faculty_index, Faculty faculty[],
                   Course courses[], int course_count,
                   Student students[], int student_count,
                   Request requests[], int *request_count,
+                  Homework homeworks[], int *hw_count,
+                  Exam exams[], int *exam_count,
+                  SurveyScore surveys[], int survey_count,
                   Calendar *calendar) {
     char my_faculty_id[50];
     strcpy(my_faculty_id, faculty[faculty_index].faculty_id);
@@ -232,7 +409,8 @@ void my_offerings(int faculty_index, Faculty faculty[],
         int offering_index = mine_indexes[number - 1];
         offering_menu(offering_index, faculty, faculty_index, offerings,courses,
                       course_count, students, student_count, requests,request_count,
-                      calendar);
+                      homeworks, hw_count, exams, exam_count,
+                      surveys, survey_count, calendar);
     }
     else if (choice == 2) {
         printf("This part will be later.\n");
@@ -354,6 +532,9 @@ void faculty_dashboard(int faculty_index,Faculty faculty[], int faculty_count,
                        Course courses[], int course_count,
                        Request requests[], int *request_count,
                        Student students[], int student_count,
+                       Homework homeworks[], int *hw_count,
+                       Exam exams[], int *exam_count,
+                       SurveyScore surveys[], int survey_count,
                        Calendar *calendar) {
     int running = 1;
     while (running) {
@@ -372,7 +553,8 @@ void faculty_dashboard(int faculty_index,Faculty faculty[], int faculty_count,
         case 1:
             my_offerings(faculty_index, faculty, offerings, offering_count,
                          courses, course_count, students, student_count,
-                         requests, request_count, calendar);
+                         requests, request_count,homeworks, hw_count,
+                         exams, exam_count, surveys, survey_count, calendar);
             break;
         case 2:
             list_offerings_semester(offerings, *offering_count, courses, course_count);

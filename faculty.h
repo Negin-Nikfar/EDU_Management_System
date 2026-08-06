@@ -11,6 +11,9 @@ void faculty_dashboard(int faculty_index,Faculty faculty[], int faculty_count,
                        Course courses[], int course_count,
                        Request requests[], int *request_count,
                        Student students[], int student_count,
+                       Homework homeworks[], int *hw_count,
+                       Exam exams[], int *exam_count,
+                       SurveyScore surveys[], int survey_count,
                        Calendar *calendar);
 
 void my_offerings(int faculty_index, Faculty faculty[],
@@ -18,12 +21,18 @@ void my_offerings(int faculty_index, Faculty faculty[],
                   Course courses[], int course_count,
                   Student students[], int student_count,
                   Request requests[], int *request_count,
+                  Homework homeworks[], int *hw_count,
+                  Exam exams[], int *exam_count,
+                  SurveyScore surveys[], int survey_count,
                   Calendar *calendar);
 
 void offering_menu(int offering_index, Faculty faculty[], int faculty_index,
                    Offering offerings[],Course courses[], int course_count,
                    Student students[], int student_count,
                    Request requests[], int *request_count,
+                   Homework homeworks[], int *hw_count,
+                   Exam exams[], int *exam_count,
+                   SurveyScore surveys[], int survey_count,
                    Calendar *calendar);
 
 void add_capacity_request(int offering_index, Offering offerings[], Faculty faculty[],

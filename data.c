@@ -453,3 +453,222 @@ int load_requests(Request requests[], int max_count) {
     fclose(f);
     return ++count;
 }
+
+void save_surveys(SurveyScore surveys[], int count) {
+    FILE *f = fopen("../data/surveys.json", "w");
+    if (f == NULL) {
+        printf("Error opening data/surveys.json\n");
+        return;
+    }
+    fprintf(f, "[\n");
+    for (int i = 0; i < count; i++)
+    {
+        fprintf(f, "{\"student_id\": \"%s\", \"offering_id\": \"%s\", \"score\": %d}",
+                surveys[i].student_id, surveys[i].offering_id, surveys[i].score);
+        if (i < count - 1) {
+            fprintf(f, ",\n");
+        }
+        else {
+            fprintf(f, "\n");
+        }
+    }
+    fprintf(f, "]\n");
+    fclose(f);
+}
+
+int load_surveys(SurveyScore surveys[], int max_count) {
+    FILE *f = fopen("../data/surveys.json", "r");
+    if (f == NULL) {
+        printf("Error opening data/surveys.json\n");
+        return 0;
+    }
+    int count = -1;
+    char line[300];
+    while (fgets(line, sizeof(line), f) != NULL) {
+        if (strstr(line, "\"student_id\"") != NULL) {
+            if (count + 1 > max_count) {
+                break;
+            }
+            count++;
+            extract_string_value(line, "student_id", surveys[count].student_id);
+            extract_string_value(line, "offering_id", surveys[count].offering_id);
+            surveys[count].score = (int) extract_number_value(line, "score");
+        }
+    }
+    fclose(f);
+    return ++count;
+}
+
+void save_homeworks(Homework homeworks[], int count) {
+    FILE *f = fopen("../data/homeworks.json", "w");
+    if (f == NULL) {
+        printf("Error opening data/homeworks.json\n");
+        return;
+    }
+    fprintf(f, "[\n");
+    for (int i = 0; i < count; i++) {
+        fprintf(f, " {\n");
+        fprintf(f, "  \"offering_id\": \"%s\",\n", homeworks[i].offering_id);
+        fprintf(f, "  \"title\": \"%s\",\n", homeworks[i].title);
+        fprintf(f, "  \"total_score\": %.2f,\n", homeworks[i].total_score);
+        fprintf(f, "  \"num_questions\": %d,\n", homeworks[i].num_questions);
+        fprintf(f, "  \"questions\": [\n");
+        for (int j = 0; j < homeworks[i].num_questions; j++) {
+            fprintf(f, "   {\"text\": \"%s\", \"option_a\": \"%s\", \"option_b\": \"%s\", "
+                    "\"option_c\": \"%s\", \"option_d\": \"%s\", \"correct\": \"%c\"}",
+                    homeworks[i].questions[j].text, homeworks[i].questions[j].option_a,
+                    homeworks[i].questions[j].option_b, homeworks[i].questions[j].option_c,
+                    homeworks[i].questions[j].option_d, homeworks[i].questions[j].correct);
+            if (j < homeworks[i].num_questions - 1) {
+                fprintf(f, ",\n");
+            }
+            else {
+                fprintf(f, "\n");
+            }
+        }
+        fprintf(f, "  ]\n");
+        fprintf(f, " }");
+        if (i < count - 1) {
+            fprintf(f, ",\n");
+        }
+        else {
+            fprintf(f, "\n");
+        }
+    }
+    fprintf(f, "]\n");
+    fclose(f);
+}
+
+int load_homeworks(Homework homeworks[], int max_count) {
+    FILE *f = fopen("../data/homeworks.json", "r");
+    if (f == NULL) {
+        printf("Error opening data/homeworks.json\n");
+        return 0;
+    }
+    int count = -1;
+    char line[300];
+    while (fgets(line, sizeof(line), f) != NULL) {
+        if (strstr(line, "\"offering_id\"") != NULL) {
+            if (count + 1 > max_count) {
+                break;
+            }
+            count++;
+            homeworks[count].num_questions = 0;
+            extract_string_value(line, "offering_id", homeworks[count].offering_id);
+        }
+        else if (strstr(line, "\"title\"") != NULL) {
+            extract_string_value(line, "title", homeworks[count].title);
+        }
+        else if (strstr(line, "\"total_score\"") != NULL) {
+            homeworks[count].total_score = extract_number_value(line, "total_score");
+        }
+        else if (strstr(line, "\"text\"") != NULL) {
+            int q = homeworks[count].num_questions;
+            extract_string_value(line, "text", homeworks[count].questions[q].text);
+            extract_string_value(line, "option_a", homeworks[count].questions[q].option_a);
+            extract_string_value(line, "option_b", homeworks[count].questions[q].option_b);
+            extract_string_value(line, "option_c", homeworks[count].questions[q].option_c);
+            extract_string_value(line, "option_d", homeworks[count].questions[q].option_d);
+            char temp[10];
+            extract_string_value(line, "correct", temp);
+            homeworks[count].questions[q].correct = temp[0];
+            homeworks[count].num_questions++;
+        }
+    }
+    fclose(f);
+    return ++count;
+}
+
+void save_exams(Exam exams[], int count) {
+    FILE *f = fopen("../data/exams.json", "w");
+    if (f == NULL) {
+        printf("Error opening data/exams.json\n");
+        return;
+    }
+    fprintf(f, "[\n");
+    for (int i = 0; i < count; i++) {
+        fprintf(f, " {\n");
+        fprintf(f, "  \"offering_id\": \"%s\",\n", exams[i].offering_id);
+        fprintf(f, "  \"title\": \"%s\",\n", exams[i].title);
+        fprintf(f, "  \"total_score\": %.2f,\n", exams[i].total_score);
+        fprintf(f, "  \"num_questions\": %d,\n", exams[i].num_questions);
+        fprintf(f, "  \"questions\": [\n");
+        for (int j = 0; j < exams[i].num_questions; j++) {
+            fprintf(f, "   {\"type\": %d, \"text\": \"%s\",",
+                    exams[i].questions[j].type,exams[i].questions[j].text);
+            if (exams[i].questions[j].type == MCQ) {
+                fprintf(f, "\"option_a\": \"%s\", \"option_b\": \"%s\", "
+                        "\"option_c\": \"%s\", \"option_d\": \"%s\", \"correct\": \"%c\"}",
+                        exams[i].questions[j].option_a, exams[i].questions[j].option_b,
+                        exams[i].questions[j].option_c, exams[i].questions[j].option_d,
+                        exams[i].questions[j].correct);
+            }
+            else {
+                fprintf(f, "\"reference_answer\": \"%s\"}",
+                        exams[i].questions[j].reference_answer);
+            }
+            if (j < exams[i].num_questions - 1) {
+                fprintf(f, ",\n");
+            }
+            else {
+                fprintf(f, "\n");
+            }
+        }
+        fprintf(f, "  ]\n");
+        fprintf(f, " }");
+        if (i < count - 1) {
+            fprintf(f, ",\n");
+        }
+        else {
+            fprintf(f, "\n");
+        }
+    }
+    fprintf(f, "]\n");
+    fclose(f);
+}
+
+int load_exams(Exam exams[], int max_count) {
+    FILE *f = fopen("../data/exams.json", "r");
+    if (f == NULL) {
+        printf("Error opening data/exams.json\n");
+        return 0;
+    }
+    int count = -1;
+    char line[300];
+    while (fgets(line, sizeof(line), f) != NULL) {
+        if (strstr(line, "\"offering_id\"") != NULL) {
+            if (count + 1 > max_count) {
+                break;
+            }
+            count++;
+            exams[count].num_questions = 0;
+            extract_string_value(line, "offering_id", exams[count].offering_id);
+        }
+        else if (strstr(line, "\"title\"") != NULL) {
+            extract_string_value(line, "title", exams[count].title);
+        }
+        else if (strstr(line, "\"total_score\"") != NULL) {
+            exams[count].total_score = extract_number_value(line, "total_score");
+        }
+        else if ( strstr(line, "\"type\"") != NULL && strstr(line, "\"text\"") != NULL) {
+            int q = exams[count].num_questions;
+            exams[count].questions[q].type = (QuestionType) extract_number_value(line, "type");
+            extract_string_value(line, "text", exams[count].questions[q].text);
+            if (exams[count].questions[q].type == MCQ) {
+                extract_string_value(line, "option_a", exams[count].questions[q].option_a);
+                extract_string_value(line, "option_b", exams[count].questions[q].option_b);
+                extract_string_value(line, "option_c", exams[count].questions[q].option_c);
+                extract_string_value(line, "option_d", exams[count].questions[q].option_d);
+                char temp[10];
+                extract_string_value(line, "correct", temp);
+                exams[count].questions[q].correct = temp[0];
+            }
+            else {
+                extract_string_value(line, "reference_answer", exams[count].questions[q].reference_answer);
+            }
+            exams[count].num_questions++;
+        }
+    }
+    fclose(f);
+    return ++count;
+}

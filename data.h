@@ -171,4 +171,13 @@ Calendar load_calendar();
 void save_requests(Request requests[], int count);
 int load_requests(Request requests[], int max_count);
 
+void save_surveys(SurveyScore surveys[], int count);
+int load_surveys(SurveyScore surveys[], int max_count);
+
+void save_homeworks(Homework homeworks[], int count);
+int load_homeworks(Homework homeworks[], int max_count);
+
+void save_exams(Exam exams[], int count);
+int load_exams(Exam exams[], int max_count);
+
 #endif //EDU_PROJECT_DATA_H

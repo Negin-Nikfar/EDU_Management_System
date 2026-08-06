@@ -2,6 +2,8 @@
 // Created by intel one on 7/9/2026.
 //
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "data.h"
 #include "admin.h"
 #include "authentication.h"
@@ -9,20 +11,29 @@
 #include "student.h"
 
 int main(void) {
-    Student students[100];
+    Student *students = malloc(100 * sizeof(Student));
     int student_count = load_students(students, 100);
 
-    Faculty faculty[100];
+    Faculty *faculty = malloc(100 * sizeof(Faculty));
     int faculty_count = load_faculty(faculty, 100);
 
-    Course courses[100];
+    Course *courses = malloc(100 * sizeof(Course));
     int course_count = load_courses(courses, 100);
 
-    Offering offerings[100];
+    Offering *offerings = malloc(100 * sizeof(Offering));
     int offering_count = load_offerings(offerings, 100);
 
-    Request requests[100];
+    Request *requests = malloc(100 * sizeof(Request));
     int request_count = load_requests(requests, 100);
+
+    SurveyScore *surveys = malloc(100 * sizeof(SurveyScore));
+    int survey_count = load_surveys(surveys, 100);
+
+    Homework *homeworks = malloc(100 * sizeof(Homework));
+    int hw_count = load_homeworks(homeworks, 100);
+
+    Exam *exams = malloc(100 * sizeof(Exam));
+    int exam_count = load_exams(exams, 100);
 
     Calendar calendar = load_calendar();
 
@@ -42,7 +53,8 @@ int main(void) {
                     int index = authenticate(ROLE_STUDENT, students, student_count, faculty, faculty_count);
                     if (index != -1) {
                         student_dashboard(index, students, student_count, offerings, &offering_count,
-                           courses, course_count, faculty, faculty_count, &calendar);
+                        courses, course_count, faculty, faculty_count, homeworks, hw_count,
+                         exams, exam_count, surveys, &survey_count, &calendar);
                     }
                     break;
                 }
@@ -51,7 +63,7 @@ int main(void) {
                     if (index != -1) {
                         faculty_dashboard(index, faculty, faculty_count, offerings, &offering_count,
                             courses, course_count, requests, &request_count, students, student_count,
-                            &calendar);
+                            homeworks, &hw_count, exams, &exam_count, surveys, survey_count, &calendar);
                     }
                     break;
                 }
