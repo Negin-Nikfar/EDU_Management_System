@@ -6,6 +6,6 @@
  "section": "Bsc", 
  "field": "Computer Engineering", 
  "department": "Computer Engineering", 
- "prerequisites": ["CE101", "CE102"]
+ "prerequisites": []
  }
 ]

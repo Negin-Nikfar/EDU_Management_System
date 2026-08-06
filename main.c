@@ -6,6 +6,7 @@
 #include "admin.h"
 #include "authentication.h"
 #include "faculty.h"
+#include "student.h"
 
 int main(void) {
     Student students[100];
@@ -40,7 +41,8 @@ int main(void) {
             case 1: {
                     int index = authenticate(ROLE_STUDENT, students, student_count, faculty, faculty_count);
                     if (index != -1) {
-                        printf("Login successful! Welcome, %s.\n", students[index].first_name);
+                        student_dashboard(index, students, student_count, offerings, &offering_count,
+                           courses, course_count, faculty, faculty_count, &calendar);
                     }
                     break;
                 }

@@ -8,6 +8,8 @@
 #include <conio.h>
 #include "utilities.h"
 
+#include "data.h"
+
 void extract_string_value(char *line, const char *key, char *output) {
     char search_key[100];
     sprintf(search_key, "\"%s\"", key);
@@ -84,4 +86,50 @@ void read_password(char *buffer) {
         }
     }
     buffer[i] = '\0';
+}
+
+int check_prerequisites(Student student, Course course) {
+    for (int i = 0; i < course.prereq_count; i++) {
+        int prereq_passed = 0;
+        for (int j = 0; j < student.enrollment_count; j++) {
+            if (strcmp(student.enrollments[j].course_id, course.prerequisites[i]) == 0 &&
+                student.enrollments[j].grade >= 10.0) {
+                prereq_passed = 1;
+                break;
+                }
+        }
+        if (!prereq_passed) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
+float calculate_gpa(Student student, char *target_semester, Course courses[], int course_count) {
+    float total_weight = 0.00;
+    int total_units = 0;
+    for (int i = 0; i < student.enrollment_count; i++) {
+        if (target_semester != NULL && strcmp(student.enrollments[i].semester, target_semester) != 0) {
+            continue;
+        }
+        if (student.enrollments[i].grade < 0) {
+            continue;
+        }
+        int course_index = -1;
+        for (int j = 0; j < course_count; j++) {
+            if (strcmp(courses[j].course_id, student.enrollments[i].course_id) == 0) {
+                course_index = j;
+                break;
+            }
+        }
+        if (course_index == -1) {
+            continue;
+        }
+        total_weight += student.enrollments[i].grade * courses[course_index].units;
+        total_units += courses[course_index].units;
+    }
+    if (total_weight == 0) {
+        return 0.00;
+    }
+    return total_weight / (float) total_units;
 }

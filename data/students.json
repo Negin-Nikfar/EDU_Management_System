@@ -15,7 +15,6 @@
  "first_book": "mathematics", 
  "bike_color": "green", 
  "enrollments": [
- {"semester": "14042", "course_id": "CE101", "grade": 19.50},
  {"semester": "14042", "course_id": "40153", "grade": 20.00}
  ]
  }
