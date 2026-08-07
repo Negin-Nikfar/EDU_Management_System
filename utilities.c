@@ -6,9 +6,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <conio.h>
+#include "data.h"
 #include "utilities.h"
 
-#include "data.h"
+#include <time.h>
+
+#define COLOR_RED "\033[1;31m"
+#define COLOR_GREEN "\033[1;32m"
+#define COLOR_YELLOW "\033[1;33m"
+#define COLOR_CYAN "\033[1;36m"
+#define COLOR_RESET "\033[0m"
 
 void extract_string_value(char *line, const char *key, char *output) {
     char search_key[100];
@@ -132,4 +139,61 @@ float calculate_gpa(Student student, char *target_semester, Course courses[], in
         return 0.00;
     }
     return total_weight / (float) total_units;
+}
+
+#ifdef _WIN32
+#include <windows.h>
+
+void enable_ansi_colors() {
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, dwMode);
+}
+#else
+void enable_ansi_colors()
+{
+
+}
+#endif
+
+void print_error(const char *error_message) {
+    printf("%sError: %s%s\n", COLOR_RED, error_message, COLOR_RESET);
+}
+
+void print_success(const char *success_message) {
+    printf("%s%s%s\n", COLOR_GREEN, success_message, COLOR_RESET);
+}
+
+void print_warning(const char* warning_message) {
+    printf("%sWarning: %s%s\n", COLOR_YELLOW, warning_message, COLOR_RESET);
+}
+
+const char *get_greeting() {
+    time_t now = time(NULL);
+    struct tm *local_time = localtime(&now);
+    int hour = local_time->tm_hour;
+
+    if (hour < 12) {
+        return "Good morning";
+    }
+    else if (hour < 17) {
+        return "Good afternoon";
+    }
+    else {
+        return "Good evening";
+    }
+}
+
+int confirm_logout() {
+    printf("%sAre you sure you want to log out? [y/n] %s", COLOR_YELLOW, COLOR_RESET);
+    char answer;
+    scanf(" %c", &answer);
+    return (answer == 'y' || answer == 'Y');
+}
+
+void print_admin_stats(int student_count, int faculty_count, int offering_count) {
+    printf("%sStudents: %d | Faculty members: %d | Total offerings: %d%s\n",
+           COLOR_CYAN, student_count, faculty_count, offering_count, COLOR_RESET);
 }

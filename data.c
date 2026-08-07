@@ -30,6 +30,9 @@ void save_students(Student students[], int count) {
         fprintf(f, " \"first_school\": \"%s\", \n", students[i].security.first_school);
         fprintf(f, " \"first_book\": \"%s\", \n", students[i].security.first_book);
         fprintf(f, " \"bike_color\": \"%s\", \n", students[i].security.bike_color);
+        fprintf(f, " \"thesis_title\": \"%s\", \n", students[i].phd_thesis.title);
+        fprintf(f, " \"thesis_abstract\": \"%s\", \n", students[i].phd_thesis.abstract);
+        fprintf(f, " \"thesis_citations\": %d, \n", students[i].phd_thesis.citations);
         fprintf(f, " \"enrollments\": [\n");
         for (int j = 0; j < students[i].enrollment_count; j++) {
             fprintf(f, " {\"semester\": \"%s\", \"course_id\": \"%s\", \"grade\": %.2f}",
@@ -71,6 +74,9 @@ int load_students(Student students[], int max_count) {
             }
             count++;
             students[count].enrollment_count = 0;
+            students[count].phd_thesis.title[0] = '\0';
+            students[count].phd_thesis.abstract[0] = '\0';
+            students[count].phd_thesis.citations = 0;
             extract_string_value(line, "first_name", students[count].first_name);
         }
         else if (strstr(line, "\"last_name\"") != NULL) {
@@ -111,6 +117,15 @@ int load_students(Student students[], int max_count) {
         }
         else if (strstr(line, "\"bike_color\"") != NULL) {
             extract_string_value(line, "bike_color", students[count].security.bike_color);
+        }
+        else if (strstr(line, "\"thesis_title\"") != NULL) {
+            extract_string_value(line, "thesis_title", students[count].phd_thesis.title);
+        }
+        else if (strstr(line, "\"thesis_abstract\"") != NULL) {
+            extract_string_value(line, "thesis_abstract", students[count].phd_thesis.abstract);
+        }
+        else if (strstr(line, "\"thesis_citations\"") != NULL) {
+            students[count].phd_thesis.citations = (int) extract_number_value(line, "thesis_citations");
         }
         else if (strstr(line, "\"course_id\"") != NULL && strstr(line, "\"semester\"") != NULL) {
             int j = students[count].enrollment_count;
@@ -203,6 +218,7 @@ void save_courses(Course courses[], int count) {
     FILE *f = fopen("../data/courses.json", "w");
     if (f == NULL) {
         printf("Error opening data/courses.json\n");
+        return;
     }
     fprintf(f, "[\n");
     for (int i = 0; i < count; i++) {
@@ -276,6 +292,7 @@ void save_offerings(Offering offerings[], int count) {
     FILE *f = fopen("../data/offerings.json", "w");
     if (f == NULL) {
         printf("Error opening data/offerings.json\n");
+        return;
     }
     fprintf(f, "[\n");
     for (int i = 0; i < count; i++) {
@@ -422,7 +439,7 @@ int load_requests(Request requests[], int max_count) {
     char line[300];
     while (fgets(line, sizeof(line), f) != NULL) {
         if (strstr(line, "\"id\"") != NULL) {
-            if (count + 1 > max_count) {
+            if (count + 1 >= max_count) {
                 break;
             }
             count++;
@@ -486,7 +503,7 @@ int load_surveys(SurveyScore surveys[], int max_count) {
     char line[300];
     while (fgets(line, sizeof(line), f) != NULL) {
         if (strstr(line, "\"student_id\"") != NULL) {
-            if (count + 1 > max_count) {
+            if (count + 1 >= max_count) {
                 break;
             }
             count++;
@@ -549,7 +566,7 @@ int load_homeworks(Homework homeworks[], int max_count) {
     char line[300];
     while (fgets(line, sizeof(line), f) != NULL) {
         if (strstr(line, "\"offering_id\"") != NULL) {
-            if (count + 1 > max_count) {
+            if (count + 1 >= max_count) {
                 break;
             }
             count++;
@@ -637,7 +654,7 @@ int load_exams(Exam exams[], int max_count) {
     char line[300];
     while (fgets(line, sizeof(line), f) != NULL) {
         if (strstr(line, "\"offering_id\"") != NULL) {
-            if (count + 1 > max_count) {
+            if (count + 1 >= max_count) {
                 break;
             }
             count++;

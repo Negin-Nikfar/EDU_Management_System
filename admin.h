@@ -21,6 +21,7 @@ void show_students_table(Student students[], int student_count);
 void search_students(Student students[], int student_count);
 void register_students(Student students[], int *student_count);
 void register_one_student(Student students[], int *student_count);
+void register_students_from_file(Student students[], int *student_count);
 void remove_student(Student students[], int *student_count);
 
 void admin_faculty(Faculty faculties[], int *faculty_count);

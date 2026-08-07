@@ -5,6 +5,10 @@
 #include <string.h>
 #include "admin.h"
 
+#include <stdlib.h>
+
+#include "utilities.h"
+
 void admin_calendar(Calendar *calendar) {
     int running = 1;
     while (running) {
@@ -23,8 +27,8 @@ void admin_calendar(Calendar *calendar) {
             calendar->offering_active = !calendar->offering_active;
             break;
         case 2:
-            if (!calendar->unit_selection_active && calendar->unit_selection_active) {
-                printf("Offering period must end before unit selection can end.\n");
+            if (!calendar->unit_selection_active && calendar->offering_active) {
+                print_error("Offering period must end before unit selection can end.\n");
             }
             else {
                 calendar->unit_selection_active = !calendar->unit_selection_active;
@@ -40,7 +44,7 @@ void admin_calendar(Calendar *calendar) {
             running = 0;
             break;
         default:
-            printf("Invalid choice. Try again!\n");
+            print_error("Invalid choice. Try again!\n");
         }
         if (choice != 5) {
             save_calendar(*calendar);
@@ -86,14 +90,18 @@ void search_students(Student students[], int student_count) {
         }
     }
     if (!found) {
-        printf("No such student found. Try again!\n");
+        print_error("No such student found. Try again!\n");
     }
 
 }
 
 void show_students_table(Student students[], int student_count) {
     printf("Admin: Students: Students list\n");
-    printf("1. Students list\n");
+    printf("Students list\n");
+    printf("|first name |last name |student id |national code |field |entrance year "
+           "|section |mentor |department| answer 1 | answer 2 | answer 3|\n");
+    printf("|-----------|----------|-----------|--------------|------|--------------"
+           "|--------|-------|----------|----------|----------|---------|\n");
 
     for (int i = 0; i < student_count; i++) {
         printf("|%s |%s |%s |%s |%s |%d |%s |%s |%s |%s |%s |%s|\n",
@@ -129,7 +137,7 @@ void register_one_student(Student students[], int *student_count) {
 
     for (int i = 0; i < *student_count; i++) {
         if (strcmp(students[i].student_id, s.student_id) == 0) {
-            printf("Student id already exists.\n");
+            print_error("Student id already exists.\n");
             return;
         }
     }
@@ -172,7 +180,114 @@ void register_one_student(Student students[], int *student_count) {
     (*student_count)++;
 
     save_students(students, *student_count);
-    printf("Done! Student registered.\n");
+    print_success("Done! Student registered.\n");
+}
+
+void register_students_from_file(Student students[], int *student_count) {
+    printf("Enter file path: ");
+    char filepath[200];
+    scanf(" %[^\n]", filepath);
+
+    FILE *f = fopen(filepath, "r");
+    if (f == NULL) {
+        print_error("Couldn't open file.");
+        return;
+    }
+
+    char line[500];
+    int line_number = 0;
+    int added_count = 0;
+    int skipped_count = 0;
+
+    while (fgets(line, sizeof(line), f) != NULL) {
+        line_number++;
+        line[strcspn(line, "\r\n")] = '\0';
+
+        if (line_number == 1) {
+            continue;
+        }
+        if (strlen(line) == 0) {
+            continue;
+        }
+
+        Student s;
+        s.enrollment_count = 0;
+
+        char *fields[14];
+        int field_count = 0;
+        char *token = strtok(line, ",");
+        while (token != NULL && field_count < 14) {
+            while (*token == ' ') {
+                token++;
+            }
+            fields[field_count] = token;
+            field_count++;
+            token = strtok(NULL, ",");
+        }
+
+        int valid = 1;
+        if (field_count < 14) {
+            valid = 0;
+        }
+        else {
+            for (int i = 0; i < 14; i++) {
+                if (strlen(fields[i]) == 0) {
+                    valid = 0;
+                    break;
+                }
+            }
+        }
+        if (valid) {
+            strncpy(s.first_name, fields[0], sizeof(s.first_name) - 1);
+            s.first_name[sizeof(s.first_name) - 1] = '\0';
+            strncpy(s.last_name, fields[1], sizeof(s.last_name) - 1);
+            s.last_name[sizeof(s.last_name) - 1] = '\0';
+            strncpy(s.student_id, fields[2], sizeof(s.student_id) - 1);
+            s.student_id[sizeof(s.student_id) - 1] = '\0';
+            s.entrance_year = atoi(fields[3]);
+            strncpy(s.national_code, fields[4], sizeof(s.national_code) - 1);
+            s.national_code[sizeof(s.national_code) - 1] = '\0';
+            strncpy(s.field, fields[5], sizeof(s.field) - 1);
+            s.field[sizeof(s.field) - 1] = '\0';
+            strncpy(s.department, fields[6], sizeof(s.department) - 1);
+            s.department[sizeof(s.department) - 1] = '\0';
+            strncpy(s.section, fields[7], sizeof(s.section) - 1);
+            s.section[sizeof(s.section) - 1] = '\0';
+            strncpy(s.mentor, fields[8], sizeof(s.mentor) - 1);
+            s.mentor[sizeof(s.mentor) - 1] = '\0';
+            strncpy(s.password, fields[9], sizeof(s.password) - 1);
+            s.password[sizeof(s.password) - 1] = '\0';
+            strncpy(s.security.birthplace, fields[10], sizeof(s.security.birthplace) - 1);
+            s.security.birthplace[sizeof(s.security.birthplace) - 1] = '\0';
+            strncpy(s.security.first_school, fields[11], sizeof(s.security.first_school) - 1);
+            s.security.first_school[sizeof(s.security.first_school) - 1] = '\0';
+            strncpy(s.security.first_book, fields[12], sizeof(s.security.first_book) - 1);
+            s.security.first_book[sizeof(s.security.first_book) - 1] = '\0';
+            strncpy(s.security.bike_color, fields[13], sizeof(s.security.bike_color) - 1);
+            s.security.bike_color[sizeof(s.security.bike_color) - 1] = '\0';
+
+            for (int i = 0; i < *student_count; i++) {
+                if (strcmp(students[i].student_id, s.student_id) == 0) {
+                    valid = 0;
+                    break;
+                }
+            }
+        }
+        if (!valid) {
+            print_warning("Skipped invalid or duplicate record.");
+            skipped_count++;
+            continue;
+        }
+        students[*student_count] = s;
+        (*student_count)++;
+        added_count++;
+    }
+    fclose(f);
+    save_students(students, *student_count);
+
+    char message[100];
+    sprintf(message, "Imported %d student(s). Skipped %d record(s).", added_count, skipped_count);
+    print_success(message);
 }
 
 void register_students(Student students[], int *student_count) {
@@ -189,10 +304,10 @@ void register_students(Student students[], int *student_count) {
         register_one_student(students, student_count);
     }
     else if (choice == 2) {
-        printf("File import will be added.\n");
+        register_students_from_file(students, student_count);
     }
     else {
-        printf("Invalid choice. Try again!\n");
+        print_error("Invalid choice. Try again!\n");
     }
 }
 
@@ -212,7 +327,7 @@ void remove_student(Student students[], int *student_count) {
         }
     }
     if (index == -1) {
-        printf("Student not found. Try again!\n");
+        print_error("Student not found. Try again!\n");
         return;
     }
     printf("|%s |%s |%s |%s |%s |%d |%s |%s |%s |\n",
@@ -221,7 +336,7 @@ void remove_student(Student students[], int *student_count) {
         students[index].field, students[index].entrance_year,
         students[index].department, students[index].section,
         students[index].mentor);
-    printf("Remove student? [y/n] ");
+    print_warning("Remove student? [y/n] ");
     char answer;
     scanf(" %c", &answer);
 
@@ -231,7 +346,7 @@ void remove_student(Student students[], int *student_count) {
         }
         (*student_count)--;
         save_students(students, *student_count);
-        printf("Done! Student removed.\n");
+        print_success("Done! Student removed.\n");
     }
 }
 
@@ -261,7 +376,7 @@ void admin_students(Student students[], int *student_count) {
             running = 0;
             break;
         default:
-            printf("Invalid choice. Try again!\n");
+            print_error("Invalid choice. Try again!\n");
         }
     }
 }
@@ -304,13 +419,17 @@ void search_faculty(Faculty faculty[], int faculty_count) {
         }
     }
     if (!found) {
-        printf("No faculties found. Try again!\n");
+        print_error("No faculties found. Try again!\n");
     }
 }
 
 void show_faculty_table(Faculty faculty[], int faculty_count) {
     printf("Admin: Faculty members: faculty list\n");
     printf("Faculty list\n");
+    printf("|first name |last name |faculty id |national code |field |entrance year "
+           "|last degree |department |\n");
+    printf("|-----------|----------|-----------|--------------|------|--------------"
+           "|------------|-----------|\n");
 
     for (int i = 0; i < faculty_count; i++) {
         printf("|%s |%s |%s |%s |%s |%d |%s |%s |\n",
@@ -318,16 +437,16 @@ void show_faculty_table(Faculty faculty[], int faculty_count) {
             faculty[i].faculty_id, faculty[i].national_code,
             faculty[i].field, faculty[i].entrance_year,
             faculty[i].last_degree, faculty[i].department);
-        printf("1. Search\n");
-        printf("2. Go back\n");
-        printf("Enter an option: ");
+    }
+    printf("1. Search\n");
+    printf("2. Go back\n");
+    printf("Enter an option: ");
 
-        int choice;
-        scanf("%d", &choice);
+    int choice;
+    scanf("%d", &choice);
 
-        if (choice == 1) {
-            search_faculty(faculty, faculty_count);
-        }
+    if (choice == 1) {
+        search_faculty(faculty, faculty_count);
     }
 }
 
@@ -346,7 +465,7 @@ void register_faculty(Faculty faculty[], int *faculty_count) {
     scanf("%s", f.faculty_id);
     for (int i = 0; i < *faculty_count; i++) {
         if (strcmp(faculty[i].faculty_id, f.faculty_id) == 0) {
-            printf("Faculty id already exists.\n");
+            print_error("Faculty id already exists.\n");
             return;
         }
     }
@@ -372,7 +491,7 @@ void register_faculty(Faculty faculty[], int *faculty_count) {
     (*faculty_count)++;
 
     save_faculty(faculty, *faculty_count);
-    printf("Done! Faculty registered.\n");
+    print_success("Done! Faculty registered.\n");
 }
 
 void remove_faculty(Faculty faculty[], int *faculty_count) {
@@ -390,10 +509,10 @@ void remove_faculty(Faculty faculty[], int *faculty_count) {
         }
     }
     if (index == -1) {
-        printf("No faculty found. Try again!\n");
+        print_error("No faculty found. Try again!\n");
         return;
     }
-    printf("Remove faculty? [y/n] ");
+    print_warning("Remove faculty? [y/n] ");
     char answer;
     scanf("%c", &answer);
 
@@ -403,7 +522,7 @@ void remove_faculty(Faculty faculty[], int *faculty_count) {
         }
         (*faculty_count)--;
         save_faculty(faculty, *faculty_count);
-        printf("Done! Faculty removed.\n");
+        print_success("Done! Faculty removed.\n");
     }
 }
 
@@ -434,7 +553,7 @@ void admin_faculty(Faculty faculty[], int *faculty_count) {
             running = 0;
             break;
         default:
-            printf("Invalid choice. Try again!\n");
+            print_error("Invalid choice. Try again!\n");
         }
     }
 }
@@ -455,7 +574,7 @@ void admin_requests(Request requests[], int *request_count,
         }
     }
     if (pending_count == 0) {
-        printf("No pending requests.\n");
+        print_error("No pending requests.\n");
         return;
     }
     printf("List of requests\n");
@@ -518,7 +637,7 @@ void admin_requests(Request requests[], int *request_count,
         scanf("%d", &request_number);
 
         if (request_number < 1 || request_number > pending_count) {
-            printf("Invalid request number.\n");
+            print_error("Invalid request number.\n");
             return;
         }
         int request_index = pending_index[request_number - 1];
@@ -574,11 +693,11 @@ void admin_requests(Request requests[], int *request_count,
                 save_offerings(offerings, *offering_count);
             }
             r->status = APPROVED;
-            printf("Request approved.\n");
+            print_success("Request approved.\n");
         }
         else if (choice == 2) {
             r->status = REJECTED;
-            printf("Request rejected.\n");
+            print_success("Request rejected.\n");
         }
         save_requests(requests, *request_count);
     }
@@ -629,7 +748,7 @@ void search_offerings(Offering offerings[],int matching_indexes[],
         }
     }
     if (!found) {
-        printf("No such offering found. Try again!\n");
+        print_error("No such offering found. Try again!\n");
     }
 }
 
@@ -640,7 +759,7 @@ void admin_enroll_student(Offering offerings[], int matching_indexes[],
     scanf("%d", &number);
 
     if (number < 1 || number > matching_count) {
-        printf("Invalid offering number.\n");
+        print_error("Invalid offering number.\n");
         return;
     }
     int offering_index = matching_indexes[number - 1];
@@ -656,18 +775,18 @@ void admin_enroll_student(Offering offerings[], int matching_indexes[],
         }
     }
     if (student_index == -1) {
-        printf("Student not found.\n");
+        print_error("Student not found.\n");
         return;
     }
     for (int i = 0; i < students[student_index].enrollment_count; i++) {
         if (strcmp(students[student_index].enrollments[i].course_id, offerings[offering_index].course_id) == 0 &&
             strcmp(students[student_index].enrollments[i].semester, offerings[offering_index].semester) == 0) {
-            printf("Student already enrolled in this course.\n");
+            print_error("Student already enrolled in this course.\n");
             return;
             }
     }
     if (offerings[offering_index].enrolled_count >= offerings[offering_index].capacity) {
-        printf("Warning: No capacity available. Adding as admin override.\n");
+        print_warning("No capacity available. Adding as admin override.\n");
     }
     int enrolled_index = students[student_index].enrollment_count;
     strcpy(students[student_index].enrollments[enrolled_index].semester, offerings[offering_index].semester);
@@ -677,7 +796,7 @@ void admin_enroll_student(Offering offerings[], int matching_indexes[],
 
     offerings[offering_index].enrolled_count++;
     save_students(students, *student_count);
-    printf("Done! Student added to offering.\n");
+    print_success("Done! Student added to offering.\n");
 }
 
 void admin_withdraw_student(Offering offerings[], int matching_indexes[],
@@ -687,7 +806,7 @@ void admin_withdraw_student(Offering offerings[], int matching_indexes[],
     scanf("%d", &number);
 
     if (number < 1 || number > matching_count) {
-        printf("Invalid number.\n");
+        print_error("Invalid number.\n");
         return;
     }
     int offering_index = matching_indexes[number - 1];
@@ -703,7 +822,7 @@ void admin_withdraw_student(Offering offerings[], int matching_indexes[],
         }
     }
     if (student_index == -1) {
-        printf("Student not found.\n");
+        print_error("Student not found.\n");
         return;
     }
     int enrolled_index = -1;
@@ -715,7 +834,7 @@ void admin_withdraw_student(Offering offerings[], int matching_indexes[],
             }
     }
     if (enrolled_index == -1) {
-        printf("Student isn't enrolled in this course.\n");
+        print_error("Student isn't enrolled in this course.\n");
         return;
     }
     for (int i = enrolled_index; i < students[student_index].enrollment_count - 1; i++) {
@@ -724,7 +843,7 @@ void admin_withdraw_student(Offering offerings[], int matching_indexes[],
     students[student_index].enrollment_count--;
     offerings[offering_index].enrolled_count--;
     save_students(students, student_count);
-    printf("Done! Student removed from offering.\n");
+    print_success("Done! Student removed from offering.\n");
 }
 
 void admin_offerings(Offering offerings[], int *offering_count,
@@ -744,10 +863,14 @@ void admin_offerings(Offering offerings[], int *offering_count,
         }
     }
     if (matching_count == 0) {
-        printf("No offerings found for this semester.\n");
+        print_error("No offerings found for this semester.\n");
         return;
     }
     printf("List of offerings - %s\n", semester);
+    printf("| number | course name | course id | faculty id | semester | capacity "
+           "| no. enrollments | department | place |\n");
+    printf("|--------|-------------|-----------|------------|----------|----------"
+           "|-----------------|------------|-------|\n");
     for (int i = 0; i < matching_count; i++) {
         int index = matching_indexes[i];
         char course_name[100] = "Unknown";
@@ -767,7 +890,7 @@ void admin_offerings(Offering offerings[], int *offering_count,
     printf("2. Add student to an offering\n");
     printf("3. Remove student from an offering\n");
     printf("4. Go back\n");
-    printf("Enter your choice: ");
+    printf("Enter an option: ");
     int choice;
     scanf("%d", &choice);
 
@@ -776,7 +899,7 @@ void admin_offerings(Offering offerings[], int *offering_count,
     }
     else if (choice == 2) {
         admin_enroll_student(offerings, matching_indexes, matching_count, students, student_count);
-        save_offerings(offerings, *student_count);
+        save_offerings(offerings, *offering_count);
     }
     else if (choice == 3) {
         admin_withdraw_student(offerings, matching_indexes, matching_count, students, *student_count);
@@ -827,13 +950,13 @@ void search_courses(Course courses[], int course_count) {
         }
     }
     if (!found) {
-        printf("No courses found. Try again!\n");
+        print_error("No courses found. Try again!\n");
     }
 }
 
 void add_course(Course courses[], int *course_count, Calendar *calendar) {
     if (calendar->class_exam_active || calendar->grade_recording_active) {
-        printf("Can't add course midterm!\n");
+        print_error("Can't add course midterm!\n");
         return;
     }
     Course c;
@@ -845,7 +968,7 @@ void add_course(Course courses[], int *course_count, Calendar *calendar) {
 
     for (int i = 0; i < *course_count; i++) {
         if (strcmp(courses[i].course_id, c.course_id) == 0) {
-            printf("Course id already exists.\n");
+            print_error("Course id already exists.\n");
             return;
         }
     }
@@ -873,7 +996,7 @@ void add_course(Course courses[], int *course_count, Calendar *calendar) {
     courses[*course_count] = c;
     (*course_count)++;
     save_courses(courses, *course_count);
-    printf("Course added.\n");
+    print_success("Course added.\n");
 }
 
 void remove_course(Course courses[], int *course_count, Offering offerings[], int offering_count) {
@@ -889,7 +1012,7 @@ void remove_course(Course courses[], int *course_count, Offering offerings[], in
         }
     }
     if (index == -1) {
-        printf("Course not found.\n");
+        print_error("Course not found.\n");
         return;
     }
     int active = 0;
@@ -900,8 +1023,8 @@ void remove_course(Course courses[], int *course_count, Offering offerings[], in
         }
     }
     if (active) {
-        printf("Warning: This course has existing offerings.\n");
-        printf("Continue? [y/n] ");
+        print_warning("This course has existing offerings.\n");
+        print_warning("Continue? [y/n] ");
         char c;
         scanf(" %c", &c);
         if (c != 'y' && c != 'Y') {
@@ -913,7 +1036,7 @@ void remove_course(Course courses[], int *course_count, Offering offerings[], in
     }
     (*course_count)--;
     save_courses(courses, *course_count);
-    printf("Course removed.\n");
+    print_success("Course removed.\n");
 }
 
 void admin_courses(Course courses[], int *course_count, Offering offerings[],
@@ -922,6 +1045,10 @@ void admin_courses(Course courses[], int *course_count, Offering offerings[],
     while (running) {
         printf("Admin: Courses\n");
         printf("List of courses\n");
+        printf("| course name | course id | units | prerequisites (separated by comma) "
+               "| section | field | department |\n");
+        printf("|-------------|-----------|-------|--------------------------------------"
+               "|---------|-------|------------|\n");
         for (int i = 0; i  < *course_count; i++) {
             printf("| %s | %s | %d |\n", courses[i].name, courses[i].course_id, courses[i].units);
             for (int j = 0; j < courses[i].prereq_count; j++) {
@@ -954,7 +1081,7 @@ void admin_courses(Course courses[], int *course_count, Offering offerings[],
                 running = 0;
                 break;
             default:
-                printf("Invalid choice. Try again!\n");
+                print_error("Invalid choice. Try again!\n");
         }
     }
 }

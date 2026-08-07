@@ -9,6 +9,7 @@
 #include "authentication.h"
 #include "faculty.h"
 #include "student.h"
+#include "utilities.h"
 
 int main(void) {
     Student *students = malloc(100 * sizeof(Student));
@@ -36,6 +37,8 @@ int main(void) {
     int exam_count = load_exams(exams, 100);
 
     Calendar calendar = load_calendar();
+
+    enable_ansi_colors();
 
     int running = 1;
     while (running) {
@@ -83,7 +86,7 @@ int main(void) {
                 running = 0;
                 break;
             default:
-                printf("Invalid choice. Try again!\n");
+                print_error("Invalid choice. Try again!\n");
         }
     }
     return 0;
@@ -98,7 +101,8 @@ void admin_dashboard(Student students[], int *student_count,
     int running = 1;
     while (running) {
         printf("Admin dashboard: \n");
-        printf("Welcome %s\n", ADMIN_USERNAME);
+        printf("%s, %s!\n", get_greeting(), ADMIN_USERNAME);
+        print_admin_stats(*student_count, *faculty_count, *offering_count);
         printf("1. Calendar\n");
         printf("2. Students\n");
         printf("3. Faculty members\n");
@@ -106,7 +110,7 @@ void admin_dashboard(Student students[], int *student_count,
         printf("5. Offerings\n");
         printf("6. Courses\n");
         printf("7. Log out\n");
-        printf("8. Enter an option: \n");
+        printf("Enter an option: \n");
 
         int choice;
         scanf("%d", &choice);
@@ -131,10 +135,12 @@ void admin_dashboard(Student students[], int *student_count,
             admin_courses(courses, course_count, offerings, *offering_count, calendar);
             break;
         case 7:
-            running = 0;
+            if (confirm_logout()) {
+                running = 0;
+            }
             break;
         default:
-            printf("Invalid choice. Try again!\n");
+            print_error("Invalid choice. Try again!\n");
         }
     }
 }

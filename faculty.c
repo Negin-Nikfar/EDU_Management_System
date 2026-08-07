@@ -5,16 +5,19 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <conio.h>
 #include "data.h"
+#include "utilities.h"
 #include "faculty.h"
 
-#include <conio.h>
+#include <stdlib.h>
+
 
 void add_capacity_request(int offering_index, Offering offerings[], Faculty faculty[],
                           int faculty_index, Request requests[], int *request_count,
                           Calendar *calendar) {
     if (!calendar->offering_active) {
-        printf("Offering period isn't active.\n");
+        print_error("Offering period isn't active.\n");
         return;
     }
     printf("Enter extra capacity to add: ");
@@ -22,7 +25,7 @@ void add_capacity_request(int offering_index, Offering offerings[], Faculty facu
     scanf("%d", &extra_capacity);
 
     if (extra_capacity <= 0) {
-        printf("Invalid extra capacity.\n");
+        print_error("Invalid extra capacity.\n");
         return;
     }
     Request r;
@@ -38,13 +41,13 @@ void add_capacity_request(int offering_index, Offering offerings[], Faculty facu
     requests[*request_count] = r;
     (*request_count)++;
     save_requests(requests, *request_count);
-    printf("Sent request to admin.\n");
+    print_success("Sent request to admin.\n");
 }
 
 void record_grades(int offering_index, Offering offerings[], Student students[],
                    int student_count, Calendar *calendar) {
     if (!calendar->grade_recording_active) {
-        printf("Grade recording isn't active.\n");
+        print_error("Grade recording isn't active.\n");
         return;
     }
     int enrolled_indexes[100];
@@ -60,7 +63,7 @@ void record_grades(int offering_index, Offering offerings[], Student students[],
         }
     }
     if (enrolled_count == 0) {
-        printf("No students enrolled in this offering.\n");
+        print_error("No students enrolled in this offering.\n");
         return;
     }
     printf("1. Enter grades manually\n");
@@ -77,7 +80,7 @@ void record_grades(int offering_index, Offering offerings[], Student students[],
             scanf("%f", &grade);
 
             while (grade < 0 || grade > 20) {
-                printf("Invalid grade. Try again!\n");
+                print_warning("Invalid grade. Try again!\n");
                 scanf("%f", &grade);
             }
             for (int k = 0; k < students[student_index].enrollment_count; k++) {
@@ -89,18 +92,102 @@ void record_grades(int offering_index, Offering offerings[], Student students[],
             }
         }
         save_students(students, student_count);
-        printf("Grades recorded.\n");
+        print_success("Grades recorded.\n");
     }
     else if (choice == 2) {
-    printf("CSV import will be later.\n");
+    printf("Enter CSV file path: ");
+        char filepath[200];
+        scanf(" %[^\n]", filepath);
+
+        FILE *f = fopen(filepath, "r");
+        if (f == NULL) {
+            print_error("Couldn't open file.");
+            return;
+        }
+
+        char line[300];
+        int line_number = 0;
+        int updated_count = 0;
+        int skipped_count = 0;
+
+        while (fgets(line, sizeof(line), f) != NULL) {
+            line_number++;
+            line[strcspn(line, "\r\n")] = '\0';
+
+            if (line_number == 1) {
+                continue;
+            }
+            if (strlen(line) == 0) {
+                continue;
+            }
+
+            char *sid_token = strtok(line, ",");
+            char *grade_token = strtok(NULL, ",");
+
+            if (sid_token == NULL || grade_token == NULL) {
+                print_warning("Invalid row (missing fields).");
+                skipped_count++;
+                continue;
+            }
+            while (*sid_token == ' ') {
+                sid_token++;
+            }
+            while (*grade_token == ' ') {
+                grade_token++;
+            }
+
+            int student_index = -1;
+            for (int j = 0; j < enrolled_count; j++) {
+                int idx = enrolled_indexes[j];
+                if (strcmp(students[idx].student_id, sid_token) == 0) {
+                    student_index = idx;
+                    break;
+                }
+            }
+            if (student_index == -1) {
+                print_warning("Student not enrolled in this offering.");
+                skipped_count++;
+                continue;
+            }
+            float grade = 0;
+            char *endptr;
+            grade = (float) strtod(grade_token, &endptr);
+            if (endptr == grade_token || *endptr != '\0') {
+                print_warning("Invalid grade.");
+                skipped_count++;
+                continue;
+            }
+            if (grade < 0 || grade > 20) {
+                print_warning("Invalid grade.");
+                skipped_count++;
+                continue;
+            }
+            for (int k = 0; k < students[student_index].enrollment_count; k++) {
+                if (strcmp(students[student_index].enrollments[k].course_id, offerings[offering_index].course_id) == 0 &&
+                    strcmp(students[student_index].enrollments[k].semester, offerings[offering_index].semester) == 0) {
+                    students[student_index].enrollments[k].grade = grade;
+                    break;
+                }
+            }
+            updated_count++;
+        }
+        fclose(f);
+        save_students(students, student_count);
+        char message[100];
+        sprintf(message, "Imported %d grade(s). Skipped %d row(s).", updated_count, skipped_count);
+        print_success(message);
+    }
+    else {
+        print_error("Invalid choice. Try again!");
     }
 }
+
 
 void remove_offering_request(int offering_index, Offering offerings[], Faculty faculty[],
                              int faculty_index, Request requests[], int *request_count,
                              Calendar *calendar) {
     if (!calendar->offering_active) {
-        printf("Offering period has ended.\n");
+        print_error("Offering period has ended.\n");
         return;
     }
     Request r;
@@ -116,13 +203,13 @@ void remove_offering_request(int offering_index, Offering offerings[], Faculty f
     requests[*request_count] = r;
     (*request_count)++;
     save_requests(requests, *request_count);
-    printf("Sent request to admin.\n");
+    print_success("Sent request to admin.\n");
 }
 
 void publish_homework(int offering_index, Offering offerings[], Faculty faculty[],
                       int faculty_index, Homework homeworks[], int *hw_count, Calendar *calendar) {
     if (!calendar->class_exam_active) {
-        printf("Class period isn't active.\n");
+        print_error("Class period isn't active.\n");
         return;
     }
     Homework hw;
@@ -139,7 +226,7 @@ void publish_homework(int offering_index, Offering offerings[], Faculty faculty[
     scanf("%d", &n);
 
     if (n < 1) {
-        printf("Number of questions must be greater than zero.\n");
+        print_error("Number of questions must be greater than zero.\n");
         return;
     }
     hw.num_questions = n;
@@ -165,13 +252,13 @@ void publish_homework(int offering_index, Offering offerings[], Faculty faculty[
     homeworks[*hw_count] = hw;
     (*hw_count)++;
     save_homeworks(homeworks, *hw_count);
-    printf("Homework published.\n");
+    print_success("Homework published.\n");
 }
 
 void publish_exam(int offering_index, Offering offerings[], Faculty faculty[], int faculty_index,
                   Exam exams[], int *exam_count, Calendar *calendar) {
     if (!calendar->class_exam_active) {
-        printf("Class period isn't active.\n");
+        print_error("Class period isn't active.\n");
         return;
     }
     Exam ex;
@@ -186,6 +273,11 @@ void publish_exam(int offering_index, Offering offerings[], Faculty faculty[], i
     printf("Enter number of questions: ");
     int n;
     scanf("%d", &n);
+
+    if (n < 1) {
+        print_error("Number of questions must be greater than zero.\n");
+        return;
+    }
 
     ex.num_questions = n;
     for (int i = 0; i < n; i++) {
@@ -222,7 +314,7 @@ void publish_exam(int offering_index, Offering offerings[], Faculty faculty[], i
     exams[*exam_count] = ex;
     (*exam_count)++;
     save_exams(exams, *exam_count);
-    printf("Exam published.\n");
+    print_success("Exam published.\n");
 }
 
 void show_survey_results(int offering_index, Offering offerings[], SurveyScore surveys[], int survey_count) {
@@ -238,7 +330,7 @@ void show_survey_results(int offering_index, Offering offerings[], SurveyScore s
         }
     }
     if (n == 0) {
-        printf("No survey responses yet.\n");
+        print_error("No survey responses yet.\n");
         return;
     }
     float sum = 0;
@@ -343,8 +435,55 @@ void offering_menu(int offering_index, Faculty faculty[], int faculty_index,
                 running = 0;
                 break;
             default:
-                printf("Invalid choice. Try again!\n");
+                print_error("Invalid choice. Try again!\n");
         }
+    }
+}
+
+void search_my_offerings(Offering offerings[], int matching_indexes[],
+                         int matching_count, Course courses[], int course_count) {
+    printf("1. Search by course name\n");
+    printf("2. Search by course id\n");
+    printf("3. Search by semester\n");
+    printf("Enter an option: ");
+    int choice;
+    scanf("%d", &choice);
+
+    printf("The phrase to search: ");
+    char phrase[50];
+    scanf("%s", phrase);
+
+    int found = 0;
+    for (int i = 0; i < matching_count; i++) {
+        int index = matching_indexes[i];
+        char course_name[100] = "Unknown";
+        for (int j = 0; j < course_count; j++) {
+            if (strcmp(courses[j].course_id, offerings[index].course_id) == 0) {
+                strcpy(course_name, courses[j].name);
+                break;
+            }
+        }
+        int match = 0;
+        if (choice == 1 && strstr(course_name, phrase) != NULL) {
+            match = 1;
+        }
+        else if (choice == 2 && strstr(offerings[index].course_id, phrase) != NULL) {
+            match = 1;
+        }
+        else if (choice == 3 && strstr(offerings[index].semester, phrase) != NULL) {
+            match = 1;
+        }
+        if (match) {
+            printf("| %s | %s | %s | %s | %d | %d | %s | %s |\n",
+                course_name, offerings[index].course_id,
+                offerings[index].faculty_id, offerings[index].semester,
+                offerings[index].capacity, offerings[index].enrolled_count,
+                offerings[index].department, offerings[index].place);
+            found = 1;
+        }
+    }
+    if (!found) {
+        print_error("No offering found. Try again!\n");
     }
 }
 
@@ -372,7 +511,7 @@ void my_offerings(int faculty_index, Faculty faculty[],
     printf("List of my Offerings(all offerings ordered by semester)\n");
 
     if (mine_count == 0) {
-        printf("You have no offerings.\n");
+        print_error("You have no offerings.\n");
         return;
     }
     for (int i = 0; i < mine_count; i++) {
@@ -403,7 +542,7 @@ void my_offerings(int faculty_index, Faculty faculty[],
         scanf("%d", &number);
 
         if (number < 1 || number > mine_count) {
-            printf("Invalid number.\n");
+            print_error("Invalid number.\n");
             return;
         }
         int offering_index = mine_indexes[number - 1];
@@ -413,7 +552,7 @@ void my_offerings(int faculty_index, Faculty faculty[],
                       surveys, survey_count, calendar);
     }
     else if (choice == 2) {
-        printf("This part will be later.\n");
+        search_my_offerings(offerings, mine_indexes, mine_count, courses, course_count);
     }
 }
 
@@ -441,7 +580,7 @@ void list_offerings_semester(Offering offerings[], int offering_count,
         }
     }
     if (!found) {
-        printf("No offering found for this semester.\n");
+        print_error("No offering found for this semester.\n");
     }
 }
 
@@ -464,7 +603,7 @@ void offer_course(Faculty faculty[], int faculty_index,
                   Request requests[], int *request_count,
                   Calendar *calendar) {
     if (!calendar->offering_active) {
-        printf("Offering period isn't active.\n");
+        print_error("Offering period isn't active.\n");
         return;
     }
     printf("Enter the course id: ");
@@ -479,7 +618,7 @@ void offer_course(Faculty faculty[], int faculty_index,
         }
     }
     if (course_index == -1) {
-        printf("Course not found.\n");
+        print_error("Course not found.\n");
         return;
     }
     printf(" | %s | %s | %d |\n", courses[course_index].name,
@@ -501,7 +640,7 @@ void offer_course(Faculty faculty[], int faculty_index,
     scanf("%d", &capacity);
 
     if (capacity <= 0) {
-        printf("Invalid capacity.\n");
+        print_error("Invalid capacity.\n");
         return;
     }
     printf("Enter the place: ");
@@ -521,10 +660,9 @@ void offer_course(Faculty faculty[], int faculty_index,
     requests[*request_count] = r;
     (*request_count)++;
     save_requests(requests, *request_count);
-    printf("Sent request to admin.\n");
+    print_success("Sent request to admin.\n");
     printf("Press any key to go to offerings...\n");
     getch();
-
 }
 
 void faculty_dashboard(int faculty_index,Faculty faculty[], int faculty_count,
@@ -539,7 +677,8 @@ void faculty_dashboard(int faculty_index,Faculty faculty[], int faculty_count,
     int running = 1;
     while (running) {
         printf("Faculty\n");
-        printf("Welcome %s %s\n", faculty[faculty_index].first_name, faculty[faculty_index].last_name);
+        printf("%s, %s %s!\n", get_greeting(), faculty[faculty_index].first_name,
+               faculty[faculty_index].last_name);
         printf("1. My offerings\n");
         printf("2. List of offerings in semester\n");
         printf("3. List of courses\n");
@@ -567,10 +706,12 @@ void faculty_dashboard(int faculty_index,Faculty faculty[], int faculty_count,
                          requests, request_count, calendar);
             break;
         case 5:
-            running = 0;
+            if (confirm_logout()) {
+                running = 0;
+            }
             break;
         default:
-            printf("Invalid choice. Try again!\n");
+            print_error("Invalid choice. Try again!\n");
         }
     }
 }

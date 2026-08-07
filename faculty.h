@@ -26,6 +26,9 @@ void my_offerings(int faculty_index, Faculty faculty[],
                   SurveyScore surveys[], int survey_count,
                   Calendar *calendar);
 
+void search_my_offerings(Offering offerings[], int matching_indexes[],
+                         int matching_count, Course courses[], int course_count);
+
 void offering_menu(int offering_index, Faculty faculty[], int faculty_index,
                    Offering offerings[],Course courses[], int course_count,
                    Student students[], int student_count,

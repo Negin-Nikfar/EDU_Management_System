@@ -37,7 +37,7 @@ int authenticate(Role role, Student students[], int student_count,
         }
     }
     if (i == -1) {
-        printf("Invalid username.\n");
+        printf("Username not found.\n");
         return -1;
     }
     printf("Enter password: ");
@@ -81,9 +81,10 @@ void forgot_password(Student students[], int student_count, Faculty faculties[],
             }
         }
         if (student_index == -1 && faculty_index == -1) {
-            printf("Invalid username.\n");
+            printf("Username not found.\n");
             printf("1. Retry\n");
             printf("2. Go to login menu\n");
+            printf("Enter an option: ");
             int ch;
             scanf("%d", &ch);
             if (ch == 2) {
@@ -131,9 +132,10 @@ void forgot_password(Student students[], int student_count, Faculty faculties[],
             }
         }
         if (all_correct != 1) {
-            printf("Incorrect answer!\n");
+            printf("Incorrect answer.\n");
             printf("1. Retry\n");
             printf("2. Go to login menu\n");
+            printf("Enter an option: ");
             int ch;
             scanf("%d", &ch);
             if (ch == 2) {
@@ -143,7 +145,7 @@ void forgot_password(Student students[], int student_count, Faculty faculties[],
                 continue;
             }
         }
-        printf("Authentication successful!\n");
+        printf("Authentication successful.\n");
         while (1) {
             char new_password[50];
             char confirm[50];
@@ -157,8 +159,9 @@ void forgot_password(Student students[], int student_count, Faculty faculties[],
 
             if (strcmp(new_password, confirm) != 0) {
                 printf("Passwords aren't matching.\n");
-                printf("1. Retry\n");
-                printf("2. Go to login menu\n");
+                printf("1. Retry.\n");
+                printf("2. Cancel (go to login menu).\n");
+                printf("Enter an option: ");
                 int ch;
                 scanf("%d", &ch);
                 if (ch == 2) {
@@ -171,7 +174,7 @@ void forgot_password(Student students[], int student_count, Faculty faculties[],
             strcpy(students[student_index].password, new_password);
             save_students(students, student_count);
             printf("Password changed successfully.\n");
-            printf("Press any key to go to the login menu...\n");
+            printf("Press any key to go to login menu...\n");
             getch();
             return;
         }
