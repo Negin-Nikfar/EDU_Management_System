@@ -6,7 +6,7 @@
 
 #include "data.h"
 
-void faculty_dashboard(int faculty_index,Faculty faculty[], int faculty_count,
+void faculty_dashboard(int faculty_index,Faculty faculty[],
                        Offering offering[], int *offering_count,
                        Course courses[], int course_count,
                        Request requests[], int *request_count,

@@ -64,7 +64,7 @@ int main(void) {
             case 2: {
                     int index = authenticate(ROLE_FACULTY, students, student_count, faculty, faculty_count);
                     if (index != -1) {
-                        faculty_dashboard(index, faculty, faculty_count, offerings, &offering_count,
+                        faculty_dashboard(index, faculty, offerings, &offering_count,
                             courses, course_count, requests, &request_count, students, student_count,
                             homeworks, &hw_count, exams, &exam_count, surveys, survey_count, &calendar);
                     }
@@ -100,7 +100,7 @@ void admin_dashboard(Student students[], int *student_count,
                      Calendar *calendar) {
     int running = 1;
     while (running) {
-        printf("Admin dashboard: \n");
+        printf("Admin dashboard:\n");
         printf("%s, %s!\n", get_greeting(), ADMIN_USERNAME);
         print_admin_stats(*student_count, *faculty_count, *offering_count);
         printf("1. Calendar\n");
@@ -110,7 +110,7 @@ void admin_dashboard(Student students[], int *student_count,
         printf("5. Offerings\n");
         printf("6. Courses\n");
         printf("7. Log out\n");
-        printf("Enter an option: \n");
+        printf("Enter an option: ");
 
         int choice;
         scanf("%d", &choice);

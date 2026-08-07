@@ -159,15 +159,15 @@ void enable_ansi_colors()
 #endif
 
 void print_error(const char *error_message) {
-    printf("%sError: %s%s\n", COLOR_RED, error_message, COLOR_RESET);
+    printf("%sError: %s%s", COLOR_RED, error_message ,COLOR_RESET);
 }
 
 void print_success(const char *success_message) {
-    printf("%s%s%s\n", COLOR_GREEN, success_message, COLOR_RESET);
+    printf("%s%s%s", COLOR_GREEN, success_message, COLOR_RESET);
 }
 
 void print_warning(const char* warning_message) {
-    printf("%sWarning: %s%s\n", COLOR_YELLOW, warning_message, COLOR_RESET);
+    printf("%sWarning: %s%s", COLOR_YELLOW, warning_message, COLOR_RESET);
 }
 
 const char *get_greeting() {

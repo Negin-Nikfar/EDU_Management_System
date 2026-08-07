@@ -153,8 +153,14 @@ void register_one_student(Student students[], int *student_count) {
     printf("Enter department: ");
     scanf(" %[^\n]", s.department);
 
-    printf("Enter section: ");
+    printf("Enter section (BSc/MSc/PhD): ");
     scanf("%s", s.section);
+    while (strcmp(s.section, "BSc") != 0 && strcmp(s.section, "MSc") != 0 &&
+           strcmp(s.section, "PhD") != 0) {
+        print_error("Section must be one of: BSc, MSc, PhD.\n");
+        printf("Enter section (BSc/MSc/PhD): ");
+        scanf("%s", s.section);
+    }
 
     printf("Enter mentor: ");
     scanf(" %[^\n]", s.mentor);
@@ -175,6 +181,28 @@ void register_one_student(Student students[], int *student_count) {
     printf("Bike_color: ");
     scanf("%s", s.security.bike_color);
 
+    s.phd_thesis.title[0] = '\0';
+    s.phd_thesis.abstract[0] = '\0';
+    s.phd_thesis.citations = 0;
+    if (strcmp(s.section, "PhD") == 0) {
+        printf("Enter thesis title: ");
+        scanf(" %[^\n]", s.phd_thesis.title);
+        printf("Enter thesis abstract: ");
+        scanf(" %[^\n]", s.phd_thesis.abstract);
+        printf("Enter thesis citation count: ");
+        scanf("%d", &s.phd_thesis.citations);
+    }
+
+    if (strlen(s.first_name) == 0 || strlen(s.last_name) == 0 ||
+        strlen(s.national_code) == 0 || strlen(s.field) == 0 ||
+        strlen(s.department) == 0 || strlen(s.mentor) == 0 ||
+        strlen(s.password) == 0 || strlen(s.security.birthplace) == 0 ||
+        strlen(s.security.first_school) == 0 || strlen(s.security.first_book) == 0 ||
+        strlen(s.security.bike_color) == 0) {
+        print_error("All fields must be filled.\n");
+        return;
+    }
+
     s.enrollment_count = 0;
     students[*student_count] = s;
     (*student_count)++;
@@ -190,7 +218,7 @@ void register_students_from_file(Student students[], int *student_count) {
 
     FILE *f = fopen(filepath, "r");
     if (f == NULL) {
-        print_error("Couldn't open file.");
+        print_error("Couldn't open file.\n");
         return;
     }
 
@@ -274,7 +302,7 @@ void register_students_from_file(Student students[], int *student_count) {
             }
         }
         if (!valid) {
-            print_warning("Skipped invalid or duplicate record.");
+            print_warning("Skipped invalid or duplicate record.\n");
             skipped_count++;
             continue;
         }
@@ -286,7 +314,7 @@ void register_students_from_file(Student students[], int *student_count) {
     save_students(students, *student_count);
 
     char message[100];
-    sprintf(message, "Imported %d student(s). Skipped %d record(s).", added_count, skipped_count);
+    sprintf(message, "Imported %d student(s). Skipped %d record(s).\n", added_count, skipped_count);
     print_success(message);
 }
 
@@ -487,6 +515,14 @@ void register_faculty(Faculty faculty[], int *faculty_count) {
     printf("Enter password: ");
     scanf(" %[^\n]", f.password);
 
+    if (strlen(f.first_name) == 0 || strlen(f.last_name) == 0 ||
+        strlen(f.national_code) == 0 || strlen(f.field) == 0 ||
+        strlen(f.department) == 0 || strlen(f.last_degree) == 0 ||
+        strlen(f.password) == 0) {
+        print_error("All fields must be filled.\n");
+        return;
+    }
+
     faculty[*faculty_count] = f;
     (*faculty_count)++;
 
@@ -624,27 +660,41 @@ void admin_requests(Request requests[], int *request_count,
             printf("No. enrollments: %d\n", enrolled);
         }
     }
-    printf("1. Go to request number\n");
-    printf("2. Go back\n");
-    printf("Enter an option: ");
+    while (1) {
+        printf("1. Go to request number\n");
+        printf("2. Go back\n");
+        printf("Enter an option: ");
 
-    int choice;
-    scanf("%d", &choice);
+        int choice;
+        scanf("%d", &choice);
 
-    if (choice == 1) {
+        if (choice == 2) {
+            return;
+        }
+        if (choice != 1) {
+            print_error("Invalid option.\n");
+            continue;
+        }
+
         printf("Enter request number: ");
         int request_number;
         scanf("%d", &request_number);
 
         if (request_number < 1 || request_number > pending_count) {
             print_error("Invalid request number.\n");
-            return;
+            continue;
         }
         int request_index = pending_index[request_number - 1];
         Request *r = &requests[request_index];
+
+        if (r->status != PENDING) {
+            print_error("This request has already been processed.\n");
+            continue;
+        }
+
         printf("1. Approve\n");
         printf("2. Reject\n");
-        printf("Go back\n");
+        printf("3. Back\n");
         printf("Enter an option: ");
 
         int action;
@@ -694,12 +744,19 @@ void admin_requests(Request requests[], int *request_count,
             }
             r->status = APPROVED;
             print_success("Request approved.\n");
+            save_requests(requests, *request_count);
         }
-        else if (choice == 2) {
+        else if (action == 2) {
             r->status = REJECTED;
             print_success("Request rejected.\n");
+            save_requests(requests, *request_count);
         }
-        save_requests(requests, *request_count);
+        else if (action == 3) {
+            continue;
+        }
+        else {
+            print_error("Invalid option.\n");
+        }
     }
 }
 
@@ -986,12 +1043,24 @@ void add_course(Course courses[], int *course_count, Calendar *calendar) {
     }
     printf("Enter section (BSc/MSc/PhD): ");
     scanf("%s", c.section);
+    while (strcmp(c.section, "BSc") != 0 && strcmp(c.section, "MSc") != 0 &&
+           strcmp(c.section, "PhD") != 0) {
+        print_error("Section must be one of: BSc, MSc, PhD.\n");
+        printf("Enter section (BSc/MSc/PhD): ");
+        scanf("%s", c.section);
+    }
 
-    printf("Enter field:");
+    printf("Enter field: ");
     scanf(" %[^\n]", c.field);
 
-    printf("Enter department:");
+    printf("Enter department: ");
     scanf(" %[^\n]", c.department);
+
+    if (strlen(c.name) == 0 || strlen(c.course_id) == 0 ||
+        strlen(c.field) == 0 || strlen(c.department) == 0) {
+        print_error("All fields must be filled.\n");
+        return;
+    }
 
     courses[*course_count] = c;
     (*course_count)++;

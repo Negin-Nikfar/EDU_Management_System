@@ -50,13 +50,10 @@ void run_surveys_for_student(int student_index, Student students[], SurveyScore 
                              int *survey_count, Offering offerings[], int offering_count,
                              Course courses[], int course_count, char *list_semester);
 
-void submit_homework(int student_index, Student students[], Homework homeworks[],
-                     int hw_count, Offering offerings[], int offering_count,
-                     Course courses[], int course_count);
+void submit_homework(Homework homeworks[], int hw_count,
+                     Offering offerings[], int offering_count);
 
-void submit_exam(int student_index, Student students[], Exam exams[],
-                 int exam_count, Offering offerings[], int offering_count,
-                 Course courses[], int course_count);
-
+void submit_exam(Exam exams[], int exam_count,
+                 Offering offerings[], int offering_count);
 
 #endif //EDU_PROJECT_STUDENT_H

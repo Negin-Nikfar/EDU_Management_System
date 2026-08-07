@@ -14,8 +14,11 @@
  "first_school": "Madaraneh", 
  "first_book": "mathematics", 
  "bike_color": "green", 
+ "thesis_title": "", 
+ "thesis_abstract": "", 
+ "thesis_citations": 0, 
  "enrollments": [
- {"semester": "14042", "course_id": "40153", "grade": 20.00}
+ {"semester": "14042", "course_id": "40153", "grade": -1.00}
  ]
  }
 ]

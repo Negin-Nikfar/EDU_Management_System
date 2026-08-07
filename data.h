@@ -132,7 +132,7 @@ typedef struct ExamQuestion {
 } ExamQuestion;
 
 typedef struct Homework {
-    char offering_id[50];
+    char offering_id[160];
     char title[100];
     float total_score;
     MCQuestion questions[20];
@@ -140,7 +140,7 @@ typedef struct Homework {
 } Homework;
 
 typedef struct Exam {
-    char offering_id[50];
+    char offering_id[160];
     char title[100];
     float total_score;
     ExamQuestion questions[20];
@@ -149,7 +149,7 @@ typedef struct Exam {
 
 typedef struct SurveyScore {
     char student_id[20];
-    char offering_id[50];
+    char offering_id[160];
     int  score;
 } SurveyScore;
 

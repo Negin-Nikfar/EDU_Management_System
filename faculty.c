@@ -12,7 +12,6 @@
 
 #include <stdlib.h>
 
-
 void add_capacity_request(int offering_index, Offering offerings[], Faculty faculty[],
                           int faculty_index, Request requests[], int *request_count,
                           Calendar *calendar) {
@@ -206,8 +205,8 @@ void remove_offering_request(int offering_index, Offering offerings[], Faculty f
     print_success("Sent request to admin.\n");
 }
 
-void publish_homework(int offering_index, Offering offerings[], Faculty faculty[],
-                      int faculty_index, Homework homeworks[], int *hw_count, Calendar *calendar) {
+void publish_homework(int offering_index, Offering offerings[],
+                      Homework homeworks[], int *hw_count, Calendar *calendar) {
     if (!calendar->class_exam_active) {
         print_error("Class period isn't active.\n");
         return;
@@ -255,7 +254,7 @@ void publish_homework(int offering_index, Offering offerings[], Faculty faculty[
     print_success("Homework published.\n");
 }
 
-void publish_exam(int offering_index, Offering offerings[], Faculty faculty[], int faculty_index,
+void publish_exam(int offering_index, Offering offerings[],
                   Exam exams[], int *exam_count, Calendar *calendar) {
     if (!calendar->class_exam_active) {
         print_error("Class period isn't active.\n");
@@ -318,7 +317,7 @@ void publish_exam(int offering_index, Offering offerings[], Faculty faculty[], i
 }
 
 void show_survey_results(int offering_index, Offering offerings[], SurveyScore surveys[], int survey_count) {
-    char offering_id[100];
+    char offering_id[160];
     sprintf(offering_id, "%s_%s_%s", offerings[offering_index].course_id, offerings[offering_index].faculty_id,
             offerings[offering_index].semester);
     int scores[100];
@@ -421,11 +420,11 @@ void offering_menu(int offering_index, Faculty faculty[], int faculty_index,
                                         requests, request_count, calendar);
                 break;
             case 4:
-                publish_homework(offering_index, offerings, faculty, faculty_index,
+                publish_homework(offering_index, offerings,
                             homeworks, hw_count, calendar);
                 break;
             case 5:
-                publish_exam(offering_index, offerings, faculty, faculty_index,
+                publish_exam(offering_index, offerings,
                          exams, exam_count, calendar);
                 break;
             case 6:
@@ -514,9 +513,13 @@ void my_offerings(int faculty_index, Faculty faculty[],
         print_error("You have no offerings.\n");
         return;
     }
+    printf("|number | course name | course id | faculty id | semester | capacity "
+           "| no. enrollments | department | place |\n");
+    printf("|-------|-------------|-----------|------------|----------|----------"
+           "|-----------------|------------|-------|\n");
     for (int i = 0; i < mine_count; i++) {
         int index = mine_indexes[i];
-        char course_name[100];
+        char course_name[100] = "Unknown";
         for (int j = 0; j < course_count; j++) {
             if (strcmp(courses[j].course_id, offerings[index].course_id) == 0) {
                 strcpy(course_name, courses[j].name);
@@ -528,11 +531,11 @@ void my_offerings(int faculty_index, Faculty faculty[],
             offerings[index].faculty_id, offerings[index].semester,
             offerings[index].capacity, offerings[index].enrolled_count,
             offerings[index].department, offerings[index].place);
-        printf("1. Go to offering\n");
-        printf("2. Search\n");
-        printf("3. Go back\n");
-        printf("4. Enter an option: ");
     }
+    printf("1. Go to offering\n");
+    printf("2. Search\n");
+    printf("3. Go back\n");
+    printf("Enter an option: ");
     int choice;
     scanf("%d", &choice);
 
@@ -562,6 +565,10 @@ void list_offerings_semester(Offering offerings[], int offering_count,
     char semester[50];
     scanf("%s", semester);
 
+    printf("| course name | course id | faculty id | semester | capacity "
+           "| no. enrollments | department | place |\n");
+    printf("|-------------|-----------|------------|----------|----------"
+           "|-----------------|------------|-------|\n");
     int found = 0;
     for (int i = 0; i < offering_count; i++) {
         if (strcmp(offerings[i].semester, semester) == 0) {
@@ -586,6 +593,10 @@ void list_offerings_semester(Offering offerings[], int offering_count,
 
 void list_courses_faculty(Course courses[], int course_count) {
     printf("List of courses\n");
+    printf("| course name | course id | units | prerequisites (separated by comma) "
+           "| section | field | department |\n");
+    printf("|-------------|-----------|-------|--------------------------------------"
+           "|---------|-------|------------|\n");
     for (int i = 0; i < course_count; i++) {
         printf("| %s | %s | %d | ", courses[i].name, courses[i].course_id, courses[i].units);
         for (int j = 0; j < courses[i].prereq_count; j++) {
@@ -665,7 +676,7 @@ void offer_course(Faculty faculty[], int faculty_index,
     getch();
 }
 
-void faculty_dashboard(int faculty_index,Faculty faculty[], int faculty_count,
+void faculty_dashboard(int faculty_index,Faculty faculty[],
                        Offering offerings[], int *offering_count,
                        Course courses[], int course_count,
                        Request requests[], int *request_count,
